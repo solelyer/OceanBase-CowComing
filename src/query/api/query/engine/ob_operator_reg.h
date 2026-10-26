@@ -511,7 +511,7 @@ class ObLogFunctionTable;
 class ObFunctionTableSpec;
 class ObFunctionTableOp;
 REGISTER_OPERATOR(ObLogFunctionTable, PHY_FUNCTION_TABLE, ObFunctionTableSpec,
-                  ObFunctionTableOp, NOINPUT);
+                  ObFunctionTableOp, NOINPUT, VECTORIZED_OP);
 
 class ObLogStatCollector;
 class ObStatCollectorSpec;

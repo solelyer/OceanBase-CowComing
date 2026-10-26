@@ -1003,7 +1003,13 @@ int ObSelectResolver::resolve(const ParseNode &parse_tree)
   ObSelectStmt *select_stmt = NULL;
   bool is_stack_overflow = false;
   const int64_t check_try_times = 32;
-  if (OB_UNLIKELY((OB_SUCCESS != (ret = TRY_CHECK_MEM_STATUS(check_try_times))))) {
+  if (parse_tree.type_ == T_FILE_SQL_DESCRIBE) {
+    ret = resolve_file_sql_describe(parse_tree);
+    select_stmt = get_select_stmt();
+  } else if (parse_tree.type_ == T_FILE_SQL_COPY) {
+    ret = resolve_file_sql_copy(parse_tree);
+    select_stmt = get_select_stmt();
+  } else if (OB_UNLIKELY((OB_SUCCESS != (ret = TRY_CHECK_MEM_STATUS(check_try_times))))) {
   } else if (NULL == (select_stmt = create_stmt<ObSelectStmt>())) {
     ret = OB_SQL_RESOLVER_NO_MEMORY;
     LOG_WARN("failed to create select stmt");

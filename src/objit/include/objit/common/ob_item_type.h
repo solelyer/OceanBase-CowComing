@@ -868,6 +868,7 @@ typedef enum ObItemType
   T_FUN_SYS_EMBEDDED_VEC = 1928,
   T_FUN_SYS_AI_PROMPT = 1929,
   T_FUN_SYS_VEC_VISIBLE = 1930, // vector index table 5
+  T_FUN_SYS_FILE_SQL = 1931,
 
   ///< @note add new sys function type before this line
   T_FUN_SYS_END = 2000,
@@ -2148,6 +2149,9 @@ typedef enum ObItemType
   T_NO_TRANSFORM_DISTINCT_AGG = 4744,
 
   T_UNNEST_EXPRESSION = 4745,
+  T_FILE_SQL_TABLE = 4746,
+  T_FILE_SQL_DESCRIBE = 4747,
+  T_FILE_SQL_COPY = 4748,
   T_TG_DB_SCHEMA = 4752,
   T_TG_SYS_EVENT_OPTION = 4753,
   T_TG_SYS_EVENT = 4754,

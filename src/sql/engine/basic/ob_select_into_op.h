@@ -28,6 +28,7 @@ namespace oceanbase
 {
 namespace sql
 {
+class FileCsvWriter;
 class ObSelectIntoOpInput : public ObOpInput
 {
   OB_UNIS_VERSION_V(1);
@@ -91,6 +92,7 @@ public:
   int64_t buffer_size_;
   bool is_overwrite_;
   ObExternalFileFormat::StringData external_properties_;
+  common::ObString file_copy_options_;
   static const int64_t DEFAULT_MAX_FILE_SIZE = 256LL * 1024 * 1024;
   static const int64_t DEFAULT_BUFFER_SIZE = 1LL * 1024 * 1024;
 };
@@ -126,7 +128,8 @@ public:
       external_properties_(),
       format_type_(ObExternalFileFormat::FormatType::CSV_FORMAT),
       block_id_(0),
-      need_commit_(true)
+      need_commit_(true),
+      file_copy_writer_(nullptr)
   {
   }
 
@@ -195,6 +198,12 @@ public:
   virtual void destroy() override;
 
 private:
+  int open_file_copy();
+  int drain_file_copy(bool batch);
+  int write_file_copy_row();
+  int open_legacy();
+  int drain_legacy_row();
+  int drain_legacy_batch(int64_t max_row_cnt);
   int init_env_common();
   int init_csv_env();
   void set_csv_format_options();
@@ -292,6 +301,7 @@ private:
   ObExternalFileFormat::FormatType format_type_;
   uint32_t block_id_;
   bool need_commit_;
+  FileCsvWriter *file_copy_writer_;
   static const int64_t SHARED_BUFFER_SIZE = 2LL * 1024 * 1024;
 
 };

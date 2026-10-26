@@ -234,6 +234,8 @@ int ObResolver::resolve(IsPrepared if_prepared, const ParseNode &parse_tree, ObS
         REGISTER_STMT_RESOLVER(MergeTable);
         break;
       }
+      case T_FILE_SQL_DESCRIBE:
+      case T_FILE_SQL_COPY:
       case T_SELECT: {
         REGISTER_SELECT_STMT_RESOLVER(Select);
         break;

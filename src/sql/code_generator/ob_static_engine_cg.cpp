@@ -5461,6 +5461,12 @@ int ObStaticEngineCG::generate_spec(ObLogSelectInto &op, ObSelectIntoSpec &spec,
   } else if (OB_FAIL(spec.user_vars_.init(op.get_user_vars().count()))) {
   } else if (OB_FAIL(spec.select_exprs_.init(op.get_select_exprs().count()))) {
   } else {
+    if (op.get_stmt() != nullptr && op.get_stmt()->is_select_stmt()) {
+      const ObSelectIntoItem *into = static_cast<const ObSelectStmt *>(op.get_stmt())->get_select_into();
+      if (into != nullptr) {
+        ret = ob_write_string(alloc, into->file_copy_options_, spec.file_copy_options_);
+      }
+    }
     ObString var;
     for (int64_t i = 0; OB_SUCC(ret) && i < op.get_user_vars().count(); ++i) {
       var.reset();
@@ -5503,6 +5509,7 @@ int ObStaticEngineCG::generate_spec(ObLogFunctionTable &op, ObFunctionTableSpec 
   if (OB_ISNULL(op.get_stmt())) {
     ret = OB_ERR_UNEXPECTED;
   } else if (OB_FAIL(spec.column_exprs_.init(op.get_stmt()->get_column_size()))) {
+  } else if (OB_FAIL(spec.file_column_ids_.init(op.get_stmt()->get_column_size()))) {
   } else if (OB_UNLIKELY(op.get_num_of_child() > 1)) {
     ret = OB_ERR_UNEXPECTED;
   } else if (OB_ISNULL(value_raw_expr = op.get_value_expr())) {
@@ -5526,6 +5533,9 @@ int ObStaticEngineCG::generate_spec(ObLogFunctionTable &op, ObFunctionTableSpec 
         OZ (mark_expr_self_produced(col_item->expr_));
         OZ (generate_rt_expr(*col_item->expr_, rt_expr));
         OZ (spec.column_exprs_.push_back(rt_expr));
+        if (value_raw_expr->get_expr_type() == T_FUN_SYS_FILE_SQL) {
+          OZ (spec.file_column_ids_.push_back(col_item->column_id_ - OB_APP_MIN_COLUMN_ID));
+        }
       }
     }
   }
@@ -6480,6 +6490,10 @@ int ObStaticEngineCG::check_op_vectorization(ObLogicalOperator *op, ObSqlSchemaG
        // TODO: @yunyi enable vectorization in multivalue index
        disable_vectorize = true;
     }
+  } else if (log_op_def::LOG_FUNCTION_TABLE == op->get_type()) {
+    const ObRawExpr *value = static_cast<ObLogFunctionTable *>(op)->get_value_expr();
+    // The PL collection iterator keeps its existing scalar evaluation rules.
+    disable_vectorize = value == nullptr || value->get_expr_type() != T_FUN_SYS_FILE_SQL;
   } else if (log_op_def::LOG_SUBPLAN_FILTER == op->get_type()) {
     ObLogSubPlanFilter *spf_op = static_cast<ObLogSubPlanFilter *>(op);
     if (spf_op->is_update_set()) {

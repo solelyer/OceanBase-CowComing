@@ -290,7 +290,7 @@ END_P SET_VAR DELIMITER
         FIELD_OPTIONALLY_ENCLOSED_BY FIELD_DELIMITER FIELD_ENCLOSED_BY FILE_EXTENSION
 
         GENERAL GEOMETRY GEOMCOLLECTION GEOMETRYCOLLECTION GET_FORMAT GLOBAL GRANTS GROUP_CONCAT GROUPING
-        GLOBAL_ALIAS
+        GLOBAL_ALIAS READ_CSV READ_JSON READ_NDJSON READ_PARQUET GLOB
 
         HASH HEAP HELP HISTOGRAM HOUR HIDDEN HYBRID HYBRID_HIST HYBRID_SEARCH
 
@@ -405,6 +405,8 @@ END_P SET_VAR DELIMITER
 %type <node> opt_limit_clause limit_expr opt_lock_type opt_for_update opt_for_update_wait opt_lock_in_share_mode
 %type <node> sort_list sort_key opt_asc_desc sort_list_for_group_by sort_key_for_group_by opt_asc_desc_for_group_by sort_list_opt_null sort_key_opt_null opt_asc_desc_null
 %type <node> opt_query_expression_option_list query_expression_option_list query_expression_option opt_distinct opt_distinct_or_all opt_separator projection
+%type <node> file_sql_table file_sql_name
+%type <node> file_sql_copy file_sql_copy_options file_sql_copy_option_list file_sql_copy_option file_sql_copy_value
 %type <node> from_list table_references table_reference table_factor normal_relation_factor dot_relation_factor relation_factor
 %type <node> relation_factor_in_hint relation_factor_in_hint_list relation_factor_in_pq_hint opt_relation_factor_in_hint_list relation_factor_in_use_join_hint_list
 %type <node> relation_factor_in_leading_hint_list joined_table tbl_name table_subquery table_subquery_alias
@@ -556,6 +558,7 @@ opt_end_p:
 /* only preparable statement will set question mark size */
 stmt:
     select_stmt             { $$ = $1; question_mark_issue($$, result); }
+  | file_sql_copy           { $$ = $1; question_mark_issue($$, result); }
   | insert_stmt             { $$ = $1; question_mark_issue($$, result); }
   | create_table_stmt       {
     $$ = $1;
@@ -10848,6 +10851,10 @@ tbl_name
 {
   $$ = $1;
 }
+| file_sql_table
+{
+  $$ = $1;
+}
 ;
 
 tbl_name:
@@ -12265,7 +12272,14 @@ explain_or_desc relation_factor opt_desc_column_option
   malloc_non_terminal_node($$, result->malloc_pool_, T_SHOW_COLUMNS, 4, $$, $2, NULL, $3);
 }
 
-| explain_or_desc explainable_stmt { GEN_EXPLAN_STMT($1, $$, 0, 0, $2, NULL, NULL);}
+| explain_or_desc explainable_stmt
+{
+  if ($1 != NULL && $1->value_ == 1 && $2->type_ == T_SELECT) {
+    malloc_non_terminal_node($$, result->malloc_pool_, T_FILE_SQL_DESCRIBE, 1, $2);
+  } else {
+    GEN_EXPLAN_STMT($1, $$, 0, 0, $2, NULL, NULL);
+  }
+}
 | explain_or_desc PRETTY explainable_stmt { GEN_EXPLAN_STMT($1, $$, 0, T_PRETTY, $3, NULL, NULL);}
 | explain_or_desc PRETTY_COLOR explainable_stmt { GEN_EXPLAN_STMT($1, $$, 0, T_PRETTY_COLOR, $3, NULL, NULL);}
 
@@ -12306,8 +12320,8 @@ explain_or_desc relation_factor opt_desc_column_option
 
 explain_or_desc:
 EXPLAIN {$$ = NULL;}
-| DESCRIBE {$$ = NULL;}
-| DESC  {$$ = NULL;}
+| DESCRIBE { malloc_terminal_node($$, result->malloc_pool_, T_INT); $$->value_ = 1; }
+| DESC { malloc_terminal_node($$, result->malloc_pool_, T_INT); $$->value_ = 1; }
 ;
 
 explainable_stmt:
@@ -17428,6 +17442,76 @@ JSON '(' column_name ')' STORE AS '(' lob_storage_parameters ')'
 }
 ;
 
+file_sql_copy:
+COPY '(' select_stmt ')' TO STRING_VALUE file_sql_copy_options
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_FILE_SQL_COPY, 3, $3, $6, $7);
+}
+| COPY relation_factor TO STRING_VALUE file_sql_copy_options
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_FILE_SQL_COPY, 3, $2, $4, $5);
+}
+;
+
+file_sql_copy_options:
+/* empty */ { $$ = NULL; }
+| '(' file_sql_copy_option_list ')'
+{
+  merge_nodes($$, result, T_EXPR_LIST, $2);
+}
+;
+
+file_sql_copy_option_list:
+file_sql_copy_option { $$ = $1; }
+| file_sql_copy_option_list ',' file_sql_copy_option
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_LINK_NODE, 2, $1, $3);
+}
+;
+
+file_sql_copy_option:
+relation_name opt_equal_mark file_sql_copy_value
+{
+  (void)($2);
+  malloc_non_terminal_node($$, result->malloc_pool_, T_OP_EQ, 2, $1, $3);
+}
+| relation_name
+{
+  ParseNode *value = NULL;
+  malloc_terminal_node(value, result->malloc_pool_, T_BOOL);
+  value->value_ = 1;
+  malloc_non_terminal_node($$, result->malloc_pool_, T_OP_EQ, 2, $1, value);
+}
+;
+
+file_sql_copy_value:
+literal { $$ = $1; }
+| relation_name { $$ = $1; }
+;
+
+file_sql_name:
+READ_CSV { make_name_node($$, result->malloc_pool_, "read_csv"); }
+| READ_JSON { make_name_node($$, result->malloc_pool_, "read_json"); }
+| READ_NDJSON { make_name_node($$, result->malloc_pool_, "read_ndjson"); }
+| READ_PARQUET { make_name_node($$, result->malloc_pool_, "read_parquet"); }
+| GLOB { make_name_node($$, result->malloc_pool_, "glob"); }
+;
+
+file_sql_table:
+file_sql_name '(' expr_list ')'
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_FILE_SQL_TABLE, 3, $1, $3, NULL);
+}
+| file_sql_name '(' expr_list ')' relation_name
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_FILE_SQL_TABLE, 3, $1, $3, $5);
+}
+| file_sql_name '(' expr_list ')' AS relation_name
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_FILE_SQL_TABLE, 3, $1, $3, $6);
+}
+;
+
 unnest_expr:
 UNNEST '(' simple_expr_list ')' 
 {
@@ -17481,6 +17565,11 @@ literal
 
 unreserved_keyword:
 unreserved_keyword_for_role_name { $$=$1;}
+| READ_CSV { $$=$1;}
+| READ_JSON { $$=$1;}
+| READ_NDJSON { $$=$1;}
+| READ_PARQUET { $$=$1;}
+| GLOB { $$=$1;}
 | unreserved_keyword_ambiguous_roles { $$=$1;}
 ;
 
