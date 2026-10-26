@@ -19,13 +19,13 @@ from __future__ import annotations
 import hashlib
 import io
 import json
-import re
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field, field_validator
 from pypdf import PdfReader
 
 from powercontext.builtin.artifacts.memory.models import MemoryCitation
+from powercontext.sources._pdf_retrieval import pdf_queries, rank_pdf_hits
 from powercontext.sources.definitions import AdapterSourceDefinition
 from powercontext.sources.models import Source, SourceMaterialization
 from powercontext.sources.projections import TEXT_EVIDENCE_PROJECTION_KEY, TextEvidence
@@ -128,44 +128,6 @@ class _PDFPageProjection:
 
 PDF_PAGE_SOURCE_DEFINITION = AdapterSourceDefinition(_PDFPageAdapter(), projections=(_PDFPageProjection(),))
 
-_QUESTION_WORDS = frozenset([
-    "what",
-    "which",
-    "who",
-    "how",
-    "why",
-    "when",
-    "where",
-    "is",
-    "are",
-    "was",
-    "were",
-    "be",
-    "been",
-    "the",
-    "a",
-    "an",
-    "of",
-    "to",
-    "in",
-    "and",
-    "or",
-    "for",
-    "from",
-    "on",
-    "at",
-    "by",
-    "with",
-    "does",
-    "do",
-    "did",
-    "has",
-    "have",
-    "had",
-    "much",
-    "many",
-])
-
 
 async def search_pdf_pages(
     memory: ScopedMemoryApplication, question: str, limit: int = 10
@@ -176,27 +138,18 @@ async def search_pdf_pages(
 
     if type(limit) is not int or limit < 1 or not question.strip():
         raise ValueError("PDF search requires a question and positive limit")  # noqa: TRY003
-    terms = tuple(dict.fromkeys(term for term in re.findall(r"\w+", question.lower()) if term not in _QUESTION_WORDS))
-    query = " ".join(terms) if terms else question
-    result = await memory.search(SearchMemoryRequest(query=query, mode="fts", limit=limit))
-    citations: list[MemoryCitation] = []
-    seen: set[tuple[str, str, int, str, str]] = set()
-    for hit in result.hits:
-        identity = (
-            hit.memory_ref.family,
-            hit.memory_ref.artifact_id,
-            hit.memory_ref.revision,
-            hit.entry_id,
-            hit.entry_version_id,
-        )
-        if identity not in seen:
-            seen.add(identity)
-            citations.append(
-                MemoryCitation(memory_ref=hit.memory_ref, entry_id=hit.entry_id, entry_version_id=hit.entry_version_id)
-            )
-        if len(citations) == limit:
-            break
-    return tuple(citations)
+    candidates = {}
+    # Search more than the final page budget before applying financial vocabulary
+    # and document identity. Every candidate and citation still comes from Memory.
+    for query in pdf_queries(question):
+        result = await memory.search(SearchMemoryRequest(query=query, mode="fts", limit=max(80, limit * 4)))
+        for hit in result.hits:
+            identity = (hit.memory_ref.artifact_id, hit.entry_id, hit.entry_version_id)
+            candidates.setdefault(identity, hit)
+    return tuple(
+        MemoryCitation(memory_ref=hit.memory_ref, entry_id=hit.entry_id, entry_version_id=hit.entry_version_id)
+        for hit in rank_pdf_hits(tuple(candidates.values()), question)[:limit]
+    )
 
 
 __all__ = [
