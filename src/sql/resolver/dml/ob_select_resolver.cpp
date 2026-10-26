@@ -16,6 +16,7 @@
 
 #define USING_LOG_PREFIX SQL_RESV
 #include "sql/resolver/dml/ob_select_resolver.h"
+#include "sql/resolver/dml/ai_column_commands.h"
 #include "sql/resolver/dml/ob_del_upd_resolver.h"
 #include "share/ob_time_utility2.h"
 #include "sql/resolver/dml/ob_aggr_expr_push_up_analyzer.h"
@@ -1003,7 +1004,11 @@ int ObSelectResolver::resolve(const ParseNode &parse_tree)
   ObSelectStmt *select_stmt = NULL;
   bool is_stack_overflow = false;
   const int64_t check_try_times = 32;
-  if (parse_tree.type_ == T_FILE_SQL_DESCRIBE) {
+  if (parse_tree.type_ == T_SHOW_AI_COLUMNS) {
+    const ParseNode *native = nullptr;
+    if (OB_FAIL(build_ai_column_command(params_, parse_tree, native))) {
+    } else { ret = resolve(*native); select_stmt = get_select_stmt(); }
+  } else if (parse_tree.type_ == T_FILE_SQL_DESCRIBE) {
     ret = resolve_file_sql_describe(parse_tree);
     select_stmt = get_select_stmt();
   } else if (parse_tree.type_ == T_FILE_SQL_COPY) {

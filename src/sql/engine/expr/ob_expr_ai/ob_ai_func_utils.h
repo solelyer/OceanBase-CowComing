@@ -353,6 +353,7 @@ public:
     endpoint_info_(endpoint_info)
   {}
    virtual ~ObAIFuncModel() {}
+   void set_http_retries(int64_t retries) { http_retries_ = MAX(0, retries); }
    // completion
    int call_completion(ObString &prompt, ObJsonObject *config, ObString &result);
    int call_completion_vector(ObArray<ObString> &prompts, ObJsonObject *config, ObArray<ObString> &results);
@@ -370,6 +371,7 @@ public:
    ObIAllocator *allocator_;
    const ObAIFuncExprInfo &info_;
    const share::ObAiModelEndpointInfo &endpoint_info_;
+   int64_t http_retries_ = 3;
    DISALLOW_COPY_AND_ASSIGN(ObAIFuncModel);
 };
 

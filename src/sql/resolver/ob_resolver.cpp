@@ -236,6 +236,7 @@ int ObResolver::resolve(IsPrepared if_prepared, const ParseNode &parse_tree, ObS
       }
       case T_FILE_SQL_DESCRIBE:
       case T_FILE_SQL_COPY:
+      case T_SHOW_AI_COLUMNS:
       case T_SELECT: {
         REGISTER_SELECT_STMT_RESOLVER(Select);
         break;
@@ -244,6 +245,7 @@ int ObResolver::resolve(IsPrepared if_prepared, const ParseNode &parse_tree, ObS
         REGISTER_STMT_RESOLVER(Insert);
         break;
       }
+      case T_RETRY_AI_COLUMN:
       case T_UPDATE: {
         REGISTER_STMT_RESOLVER(Update);
         break;

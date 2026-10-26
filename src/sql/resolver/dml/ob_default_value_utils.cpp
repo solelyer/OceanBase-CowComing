@@ -15,6 +15,7 @@
  */
 
 #define USING_LOG_PREFIX SQL_RESV
+#include "sql/resolver/dml/ai_column_dml.h"
 #include "sql/resolver/dml/ob_default_value_utils.h"
 #include "sql/engine/expr/ob_expr_column_conv.h"
 #include "sql/resolver/dml/ob_del_upd_resolver.h"
@@ -27,11 +28,14 @@ namespace sql
 int ObDefaultValueUtils::generate_insert_value(const ColumnItem *column, ObRawExpr* &expr)
 {
   int ret = OB_SUCCESS;
+  bool ai_default = false;
   ObDMLDefaultOp op = OB_INVALID_DEFAULT_OP;
   if (OB_ISNULL(column) || OB_ISNULL(params_) ||
       OB_ISNULL(params_->expr_factory_) ||
       OB_ISNULL(params_->session_info_)) {
     ret = OB_INVALID_ARGUMENT;
+  } else if (stmt_ != nullptr && OB_FAIL(build_ai_column_default(*params_, *stmt_, *column, expr, ai_default))) {
+  } else if (ai_default) {
   } else if (OB_FAIL(get_default_type_for_insert(column, op))) {
   } else {
     if (OB_NORMAL_DEFAULT_OP == op) {
@@ -176,11 +180,14 @@ int ObDefaultValueUtils::resolve_default_function(ObRawExpr *&expr, ObStmtScope 
 int ObDefaultValueUtils::resolve_default_expr(const ColumnItem &column_item, ObRawExpr *&expr, ObStmtScope scope)
 {
   int ret = OB_SUCCESS;
+  bool ai_default = false;
   if (OB_ISNULL(column_item.get_expr()) || (scope != T_INSERT_SCOPE && scope != T_UPDATE_SCOPE)) {
     ret = OB_ERR_UNEXPECTED;
   } else if (OB_ISNULL(stmt_) || OB_ISNULL(params_) || OB_ISNULL(params_->expr_factory_)) {
     ret = OB_ERR_UNEXPECTED;
     LOG_WARN("invalid stmt", K(stmt_), KP_(params));
+  } else if (OB_FAIL(build_ai_column_default(*params_, *stmt_, column_item, expr, ai_default))) {
+  } else if (ai_default) {
   } else if (column_item.expr_->is_generated_column()) {
     if (OB_FAIL(build_default_expr_for_generated_column(column_item, expr))) {
     }

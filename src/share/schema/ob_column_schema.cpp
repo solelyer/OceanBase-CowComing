@@ -17,6 +17,7 @@
 #define USING_LOG_PREFIX SHARE_SCHEMA
 #include "ob_column_schema.h"
 #include "share/schema/ob_schema_service.h"
+#include "share/ai_column/ai_column_info.h"
 
 namespace oceanbase
 {
@@ -82,6 +83,7 @@ int ObColumnSchemaV2::assign(const ObColumnSchemaV2 &src_schema)
     } else if (OB_FAIL(deep_copy_obj(src_schema.cur_default_value_, cur_default_value_))) {
     } else if (OB_FAIL(deep_copy_str(src_schema.column_name_, column_name_))) {
     } else if (OB_FAIL(deep_copy_str(src_schema.comment_, comment_))) {
+    } else if (OB_FAIL(deep_copy_str(src_schema.ai_column_info_, ai_column_info_))) {
     } else if (OB_FAIL(set_extended_type_info(src_schema.extended_type_info_))) {
     } else if (src_schema.column_ref_idxs_ != NULL) {
       if (OB_FAIL(alloc_column_ref_set())) {
@@ -120,6 +122,7 @@ int64_t ObColumnSchemaV2::get_convert_size() const
   convert_size += cur_default_value_.get_deep_copy_size();
   convert_size += column_name_.length() + 1;
   convert_size += comment_.length() + 1;
+  convert_size += ai_column_info_.length() + 1;
   if (column_ref_idxs_ != NULL) {
     convert_size += sizeof(ColumnReferenceSet);
   }
@@ -176,6 +179,7 @@ void ObColumnSchemaV2::reset()
   cur_default_value_.reset();
   column_name_.reset();
   comment_.reset();
+  ai_column_info_.reset();
   column_flags_ = NON_CASCADE_FLAG;
   column_ref_idxs_ = NULL;
   prev_column_id_ = UINT64_MAX;
@@ -235,7 +239,7 @@ OB_DEF_SERIALIZE(ObColumnSchemaV2)
                 sub_type_,
                 skip_index_attr_,
                 lob_chunk_size_,
-                local_session_vars_);
+                local_session_vars_, ai_column_info_);
   }
 
   return ret;
@@ -248,6 +252,7 @@ OB_DEF_DESERIALIZE(ObColumnSchemaV2)
   ObObj cur_default_value;
   ObString column_name;
   ObString comment;
+  ObString ai_column_info;
   bool has_column_ref = false;
 
   LST_DO_CODE(OB_UNIS_DECODE,
@@ -295,7 +300,8 @@ OB_DEF_DESERIALIZE(ObColumnSchemaV2)
                 sub_type_,
                 skip_index_attr_,
                 lob_chunk_size_,
-                local_session_vars_);
+                local_session_vars_, ai_column_info);
+    if (OB_SUCC(ret)) { ret = set_ai_column_info(ai_column_info); }
   }
   return ret;
 }
@@ -340,7 +346,7 @@ OB_DEF_SERIALIZE_SIZE(ObColumnSchemaV2)
               sub_type_,
               skip_index_attr_,
               lob_chunk_size_,
-              local_session_vars_);
+              local_session_vars_, ai_column_info_);
   return len;
 }
 
@@ -567,6 +573,22 @@ int ObColumnSchemaV2::convert_column_id(const hash::ObHashMap<uint64_t, uint64_t
     } else {
       set_next_column_id(new_column_id);
     }
+  }
+  if (OB_SUCC(ret) && is_ai_column()) {
+    ObArenaAllocator allocator("AiColIdMap");
+    share::AiColumnInfo info(allocator);
+    ObString definition;
+    if (OB_FAIL(info.deserialize(get_ai_column_info()))) {
+    } else if (OB_FAIL(column_id_map.get_refactored(info.state_id_, info.state_id_))) {
+    } else if (OB_FAIL(column_id_map.get_refactored(info.request_id_, info.request_id_))) {
+    } else if (OB_FAIL(column_id_map.get_refactored(info.result_spec_id_, info.result_spec_id_))) {
+    }
+    for (int64_t i = 0; OB_SUCC(ret) && i < info.dependencies_.count(); ++i) {
+      ret = column_id_map.get_refactored(info.dependencies_.at(i), info.dependencies_.at(i));
+    }
+    if (OB_FAIL(ret)) {
+    } else if (OB_FAIL(info.serialize(definition))) {
+    } else { ret = set_ai_column_info(definition); }
   }
   return ret;
 }

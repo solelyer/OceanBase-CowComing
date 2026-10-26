@@ -259,7 +259,7 @@ END_P SET_VAR DELIMITER
 //-----------------------------reserved keyword end-------------------------------------------------
 %token <non_reserved_keyword>
 //-----------------------------non_reserved keyword begin-------------------------------------------
-        ACCESS ACCOUNT ACTION ACTIVE ADDDATE AFTER AGAINST AGGREGATE AI ALGORITHM ALWAYS ALLOW ANALYSE ANY
+        ACCESS ACCOUNT ACTION ACTIVE ADDDATE AFTER AGAINST AGGREGATE AI ALGORITHM ALWAYS ALLOW ANALYSE ANY RETRY
         APPROX_COUNT_DISTINCT APPROX_COUNT_DISTINCT_SYNOPSIS APPROX_COUNT_DISTINCT_SYNOPSIS_MERGE
         ARRAY ASCII ASIS AT ATTRIBUTE AUTHORS AUTO AUTOEXTEND_SIZE AUTO_INCREMENT AUTO_INCREMENT_CACHE_SIZE
         AVG AVG_ROW_LENGTH ACTIVATE AVAILABILITY ASYNCHRONOUS AUDIT ADMIN AUTO_REFRESH API_MODE APPROX APPROXIMATE ARRAY_AGG ARRAY_FILTER ARRAY_FIRST ARRAY_MAP ARRAY_SORTBY
@@ -372,6 +372,7 @@ END_P SET_VAR DELIMITER
         ORGANIZATION
 //-----------------------------non_reserved keyword end---------------------------------------------
 %type <node> sql_stmt stmt_list stmt opt_end_p
+%type <node> opt_ai_retry_extra
 %type <node> select_stmt update_stmt delete_stmt
 %type <node> insert_stmt single_table_insert values_clause dml_table_name
 %type <node> create_table_stmt create_table_like_stmt fork_table_stmt fork_database_stmt diff_table_stmt merge_table_stmt opt_table_option_list table_option_list table_option table_option_list_space_seperated parallel_option lob_storage_clause lob_storage_parameter lob_storage_parameters lob_chunk_size
@@ -407,6 +408,7 @@ END_P SET_VAR DELIMITER
 %type <node> opt_query_expression_option_list query_expression_option_list query_expression_option opt_distinct opt_distinct_or_all opt_separator projection
 %type <node> file_sql_table file_sql_name
 %type <node> file_sql_copy file_sql_copy_options file_sql_copy_option_list file_sql_copy_option file_sql_copy_value
+%type <node> opt_ai_column_options
 %type <node> from_list table_references table_reference table_factor normal_relation_factor dot_relation_factor relation_factor
 %type <node> relation_factor_in_hint relation_factor_in_hint_list relation_factor_in_pq_hint opt_relation_factor_in_hint_list relation_factor_in_use_join_hint_list
 %type <node> relation_factor_in_leading_hint_list joined_table tbl_name table_subquery table_subquery_alias
@@ -6142,6 +6144,12 @@ column_attribute_list column_attribute
 }
 
 column_attribute:
+AI COLUMN '(' expr ')' opt_ai_column_options
+{
+  dup_expr_string($4, result, @4.first_column, @4.last_column);
+  malloc_non_terminal_node($$, result->malloc_pool_, T_AI_COLUMN, 2, $4, $6);
+}
+|
 not NULLX
 {
   (void)($1) ;
@@ -12639,6 +12647,12 @@ CLASS_ORIGIN
  *
  *****************************************************************************/
 show_stmt:
+SHOW AI COLUMNS from_or_in relation_factor
+{
+  (void)$4;
+  malloc_non_terminal_node($$, result->malloc_pool_, T_SHOW_AI_COLUMNS, 1, $5);
+}
+|
 SHOW opt_extended_or_full TABLES opt_from_or_in_database_clause opt_show_condition
 {
   ParseNode *value = NULL;
@@ -14667,6 +14681,12 @@ relation_factor TO relation_factor
  *
  *****************************************************************************/
 alter_table_stmt:
+alter_with_opt_hint TABLE relation_factor RETRY AI COLUMN column_name opt_where opt_ai_retry_extra
+{
+  (void)$1;
+  malloc_non_terminal_node($$, result->malloc_pool_, T_RETRY_AI_COLUMN, 4, $3, $7, $8, $9);
+}
+|
 alter_with_opt_hint TABLE relation_factor alter_table_actions
 {
   ParseNode *table_actions = NULL;
@@ -14676,6 +14696,11 @@ alter_with_opt_hint TABLE relation_factor alter_table_actions
 }
 ;
 
+
+opt_ai_retry_extra:
+/* EMPTY */ { $$ = NULL; }
+| ',' alter_table_action_list { $$ = $2; }
+;
 
 alter_table_actions:
 alter_table_action_list
@@ -17442,6 +17467,11 @@ JSON '(' column_name ')' STORE AS '(' lob_storage_parameters ')'
 }
 ;
 
+opt_ai_column_options:
+/* empty */ { $$ = NULL; }
+| WITH '(' expr_list ')' { $$ = $3; }
+;
+
 file_sql_copy:
 COPY '(' select_stmt ')' TO STRING_VALUE file_sql_copy_options
 {
@@ -18046,6 +18076,7 @@ ACCOUNT
 |       RESET
 |       RESPECT
 |       RESTART
+|       RETRY
 |       RESTORE
 |       RESUME
 |       RETURNED_SQLSTATE

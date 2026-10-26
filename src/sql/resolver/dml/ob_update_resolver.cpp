@@ -16,6 +16,7 @@
 
 #define USING_LOG_PREFIX SQL_RESV
 #include "sql/resolver/dml/ob_update_resolver.h"
+#include "sql/resolver/dml/ai_column_commands.h"
 
 namespace oceanbase
 {
@@ -34,12 +35,22 @@ ObUpdateResolver::~ObUpdateResolver()
 {
 }
 
-int ObUpdateResolver::resolve(const ParseNode &parse_tree)
+int ObUpdateResolver::resolve(const ParseNode &input_tree)
 {
   int ret = OB_SUCCESS;
+  const bool retry = input_tree.type_ == T_RETRY_AI_COLUMN;
+  const bool previous_internal = session_info_ != nullptr && session_info_->is_ai_column_internal();
+  const ParseNode *native = nullptr;
+  if (session_info_ == nullptr) { ret = OB_ERR_UNEXPECTED; }
+  else if (retry) {
+    if (OB_FAIL(build_ai_column_command(params_, input_tree, native))) {
+    } else { session_info_->set_ai_column_internal(true); }
+  }
+  const ParseNode &parse_tree = native == nullptr ? input_tree : *native;
   ObUpdateStmt *update_stmt = NULL;
   ObSEArray<ObTableAssignment, 2> tables_assign;
-  if (T_UPDATE != parse_tree.type_
+  if (OB_FAIL(ret)) {
+  } else if (T_UPDATE != parse_tree.type_
       || 3 > parse_tree.num_child_
       || OB_ISNULL(parse_tree.children_)
       || OB_ISNULL(session_info_)) {
@@ -150,6 +161,8 @@ int ObUpdateResolver::resolve(const ParseNode &parse_tree)
     } else if (OB_FAIL(check_safe_update_mode(update_stmt))) {
     } else { /*do nothing*/ }
   }
+  if (session_info_ != nullptr) { session_info_->set_ai_column_internal(previous_internal); }
+  if (retry && OB_SUCC(ret)) { params_.query_ctx_->set_has_nested_sql(true); }
   return ret;
 }
 

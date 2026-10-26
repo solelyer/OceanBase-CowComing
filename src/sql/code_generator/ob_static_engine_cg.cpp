@@ -5722,6 +5722,8 @@ int ObStaticEngineCG::set_properties_post(const ObLogPlan &log_plan, ObPhysicalP
     phy_plan.set_plan_hash_value(log_plan.get_signature());
     phy_plan.set_stmt_type(log_plan.get_stmt()->get_stmt_type());
     phy_plan.set_literal_stmt_type(exec_ctx->get_stmt_factory()->get_query_ctx()->get_literal_stmt_type());
+    if (OB_FAIL(phy_plan.ai_column_reads_.assign(exec_ctx->get_stmt_factory()->get_query_ctx()->ai_column_reads_))) {
+    }
     if (exec_ctx->get_stmt_factory()->get_query_ctx()->has_nested_sql()) {
       phy_plan.set_has_nested_sql(exec_ctx->get_stmt_factory()->get_query_ctx()->has_nested_sql());
     }

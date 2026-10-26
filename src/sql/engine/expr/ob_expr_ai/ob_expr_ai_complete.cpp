@@ -155,6 +155,9 @@ int ObExprAIComplete::eval_ai_complete(const ObExpr &expr,
                    model_id, temp_allocator, resolved_endpoint))) {
     } else {
       ObAIFuncModel model(temp_allocator, *info, *endpoint_info);
+      if (ctx.exec_ctx_.get_my_session() != nullptr && ctx.exec_ctx_.get_my_session()->is_ai_column_internal()) {
+        model.set_http_retries(0);
+      }
       ObString result;
       if (OB_FAIL(model.call_completion(prompt, config, result))) {
       } else if (OB_FAIL(ObAIFuncUtils::set_string_result(expr, ctx, res, result))) {

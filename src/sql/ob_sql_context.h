@@ -631,6 +631,8 @@ public:
     type_demotion_flag_ = 0;
     has_hybrid_search_ = false;
     has_file_sql_ = false;
+    ai_column_requests_.reset();
+    ai_column_reads_.reset();
   }
 
   int64_t get_new_stmt_id() { return stmt_count_++; }
@@ -742,6 +744,9 @@ public:
   };
   bool has_hybrid_search_;
   bool has_file_sql_;
+  common::ObSEArray<std::pair<uint64_t, ObRawExpr *>, 4> ai_column_requests_;
+  // Repeated triples: base table id, AI result column id, physical state column id.
+  common::ObSEArray<uint64_t, 16> ai_column_reads_;
 };
 
 } /* ns sql*/

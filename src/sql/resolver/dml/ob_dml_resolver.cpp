@@ -17,6 +17,7 @@
 #define USING_LOG_PREFIX SQL_RESV
 #include "config_bridge.h"
 #include "ob_dml_resolver.h"
+#include "sql/resolver/dml/ai_column_dml.h"
 #include "sql/resolver/dml/ob_view_table_resolver.h"
 #include "sql/optimizer/ob_optimizer_util.h"
 #include "sql/resolver/dml/ob_default_value_utils.h"
@@ -1036,7 +1037,7 @@ int ObDMLResolver::resolve_sql_expr(const ParseNode &node, ObRawExpr *&expr,
     }
     if (OB_SUCC(ret)) {
       if (OB_NOT_NULL(params_.query_ctx_)) {
-        params_.query_ctx_->set_has_nested_sql(!udf_info.empty());
+        params_.query_ctx_->set_has_nested_sql(params_.query_ctx_->has_nested_sql() || !udf_info.empty());
       }
     }
 
@@ -1839,6 +1840,7 @@ int ObDMLResolver::resolve_basic_column_item(const TableItem &table_item,
   if (NULL == stmt) {
     stmt = get_stmt();
   }
+  if (session_info_ != nullptr && session_info_->is_ai_column_internal()) { include_hidden = true; }
   if (OB_ISNULL(stmt)
       || OB_ISNULL(schema_checker_)
       || OB_ISNULL(schema_guard = schema_checker_->get_schema_guard())
@@ -1959,6 +1961,9 @@ int ObDMLResolver::resolve_basic_column_item(const TableItem &table_item,
         col_item = stmt->get_column_item(stmt->get_column_size() - 1);
       }
     }
+  }
+  if (OB_SUCC(ret) && col_item != nullptr) {
+    ret = track_ai_column_read(params_, *stmt, table_item, *col_item);
   }
   return ret;
 }
@@ -2416,6 +2421,11 @@ int ObDMLResolver::resolve_basic_table_without_cte(const ParseNode &parse_tree, 
                  OB_FAIL(resolve_index_hint(*table_item, *index_hint_node))) {
       }
 
+      if (OB_SUCCESS == ret && !stmt->is_select_stmt() && !session_info_->is_ai_column_internal()) {
+        for (ObTableSchema::const_column_iterator it = table_schema->column_begin(); it != table_schema->column_end(); ++it) {
+          if ((*it)->is_ai_column()) { params_.query_ctx_->set_has_nested_sql(true); }
+        }
+      }
       if (OB_SUCCESS == ret && table_item->is_view_table_) {
         if (OB_FAIL(expand_view(*table_item))) {
         }

@@ -224,6 +224,7 @@ public:
   bool contain_table_scan() const { return contain_table_scan_; }
   void set_has_nested_sql(bool has_nested_sql) { has_nested_sql_ = has_nested_sql; }
   bool has_nested_sql() const { return has_nested_sql_; }
+  common::ObSEArray<uint64_t, 16> ai_column_reads_;
   void set_session_id(uint64_t v) { session_id_ = v; }
   uint64_t get_session_id() const { return session_id_; }
   bool contains_temp_table() const {return 0 != session_id_; }

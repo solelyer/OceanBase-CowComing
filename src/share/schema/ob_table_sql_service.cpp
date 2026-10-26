@@ -15,6 +15,7 @@
  */
 
 #define USING_LOG_PREFIX SHARE_SCHEMA
+#include "share/ai_column/ai_column_info.h"
 #include "ob_table_sql_service.h"
 #include "lib/literals/ob_literals.h"
 #include "share/ob_global_stat_proxy.h"
@@ -990,6 +991,12 @@ int ObTableSqlService::update_single_column(
     }
   }
 
+  if (OB_SUCC(ret) && !new_table_schema.is_index_table()) {
+    const ObColumnSchemaV2 *previous = origin_table_schema.get_column_schema(new_column_schema.get_column_id());
+    if (previous != nullptr && previous->is_ai_column() && !new_column_schema.is_ai_column()) {
+      ret = remove_ai_columns(sql_client, new_column_schema.get_table_id(), new_column_schema.get_column_id());
+    } else { ret = persist_ai_column(sql_client, new_column_schema); }
+  }
   return ret;
 }
 
@@ -1003,6 +1010,7 @@ int ObTableSqlService::add_columns(ObISQLClient &sql_client,
   } else {
     ret = add_columns_for_not_core(sql_client, table);
   }
+  if (OB_SUCC(ret)) { ret = persist_ai_columns(sql_client, table); }
   return ret;
 }
 
@@ -1144,6 +1152,7 @@ int ObTableSqlService::batch_add_columns_for_create_table(common::ObISQLClient &
     } else if (FALSE_IT(time_guard.click("insert_all_column_history"))) {
     }
   }
+  for (int64_t i = 0; OB_SUCC(ret) && i < tables.count(); ++i) { ret = persist_ai_columns(sql_client, tables.at(i)); }
   return ret;
 }
 
@@ -1638,6 +1647,7 @@ int ObTableSqlService::add_single_column(ObISQLClient &sql_client,
     }
   }
 
+  if (OB_SUCC(ret) && !only_history) { ret = persist_ai_column(sql_client, column); }
   return ret;
 }
 
@@ -2044,6 +2054,7 @@ int ObTableSqlService::delete_single_column(
     }
   }
 
+  if (OB_SUCC(ret) && orig_column_schema.is_ai_column()) { ret = remove_ai_columns(sql_client, table_id, column_id); }
   return ret;
 }
 
@@ -2764,6 +2775,7 @@ int ObTableSqlService::delete_from_all_column(ObISQLClient &sql_client,
     }
   }
 
+  if (OB_SUCC(ret) && !is_inner_table(table_id)) { ret = remove_ai_columns(sql_client, table_id); }
   return ret;
 }
 
@@ -3218,6 +3230,7 @@ int ObTableSqlService::gen_column_dml_without_check(
                          || (OB_FAIL(dml.add_column("skip_index_attr", column.get_skip_index_attr().get_packed_value())))
                          || (OB_FAIL(dml.add_column("lob_chunk_size", column.get_lob_chunk_size())))
                          || (OB_FAIL(dml.add_column("local_session_vars", ObHexEscapeSqlStr(local_session_var))))
+                         || OB_FAIL(dml.add_column("ai_column_info", ObHexEscapeSqlStr(column.get_ai_column_info())))
                          || OB_FAIL(dml.add_gmt_create())
                          || OB_FAIL(dml.add_gmt_modified()))) {
     }

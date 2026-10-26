@@ -155,6 +155,7 @@ void ObPhysicalPlan::reset()
   is_wise_join_ = false;
   contain_table_scan_ = false;
   has_nested_sql_ = false;
+  ai_column_reads_.reset();
   session_id_ = 0;
   is_update_uniq_index_ = false;
   contain_index_location_ = false;
@@ -625,6 +626,7 @@ OB_SERIALIZE_MEMBER(ObPhysicalPlan,
                     vars_,
                     px_dop_,
                     has_nested_sql_,
+                    ai_column_reads_,
                     use_pdml_,
                     is_new_engine_,
                     use_temp_table_,

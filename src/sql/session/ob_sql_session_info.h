@@ -622,6 +622,8 @@ public:
   // sql from obclient, proxy, PL are all marked as user_session
   // NOTE: for sql from PL, is_inner() = true, is_user_session() = true
   inline bool is_user_session() const { return USER_SESSION == session_type_; }
+  bool is_ai_column_internal() const { return ai_column_internal_; }
+  void set_ai_column_internal(bool value) { ai_column_internal_ = value; }
   bool is_inner() const
   {
     return inner_flag_;
@@ -1030,6 +1032,7 @@ private:
   void *tx_ctx_cache_;
   common::ObString audit_filter_name_;
   ObExecutingSqlStatRecord executing_sql_stat_record_;
+  bool ai_column_internal_ = false;
 };
 
 

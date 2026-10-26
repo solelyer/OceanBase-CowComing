@@ -1436,9 +1436,30 @@ int ObAIFuncModel::call_completion(ObString &prompt, ObJsonObject *config, ObStr
   ObString prompt_str;
   ObString result_str;
   ObAIFuncClient client;
+  client.set_max_retry_times(http_retries_);
   ObString unencrypted_access_key;
   ObString request_model_name = get_request_model_name();
-  if (!is_completion_type()) {
+  if (config != nullptr && config->get_value("system_prompt") != nullptr) {
+    ObJsonNode *system = config->get_value("system_prompt");
+    ObJsonObject *options = nullptr;
+    if (system->json_type() != ObJsonNodeType::J_STRING) {
+      ret = OB_INVALID_ARGUMENT;
+    } else if (OB_ISNULL(options = OB_NEWx(ObJsonObject, allocator_, allocator_))) {
+      ret = OB_ALLOCATE_MEMORY_FAILED;
+    } else {
+      prompt_str = static_cast<ObJsonString *>(system)->get_str();
+      for (uint64_t i = 0; OB_SUCC(ret) && i < config->element_count(); ++i) {
+        ObString key;
+        if (OB_FAIL(config->get_key(i, key))) {
+        } else if (key != "system_prompt") {
+          ret = options->add(key, config->get_value(key));
+        }
+      }
+      config = options;
+    }
+  }
+  if (OB_FAIL(ret)) {
+  } else if (!is_completion_type()) {
     ret = OB_INVALID_ARGUMENT;
     LOG_USER_ERROR(OB_INVALID_ARGUMENT, "ai_complete, info type is not completion");
   } else if (OB_FAIL(ObAIFuncUtils::get_complete_provider(*allocator_, endpoint_info_.get_provider(), complete_provider))) {
@@ -1587,6 +1608,7 @@ int ObAIFuncModel::call_dense_embedding_vector_v2(ObArray<ObString> &content, Ob
   ObAIFuncIEmbed *embed_provider = nullptr;
   ObString result_str;
   ObAIFuncClient client;
+  client.set_max_retry_times(http_retries_);
   int64_t dimension = 0;
   if (OB_NOT_NULL(config)) {
     ObJsonNode *dimension_node = config->get_value("dimensions");

@@ -15,6 +15,7 @@
  */
 
 #define USING_LOG_PREFIX SQL_RESV
+#include "sql/resolver/dml/ai_column_dml.h"
 #include "ob_del_upd_resolver.h"
 #include "sql/resolver/dml/ob_default_value_utils.h"
 #include "sql/resolver/dml/ob_update_stmt.h"
@@ -129,7 +130,8 @@ int ObDelUpdResolver::resolve_assignments(const ParseNode &parse_node,
         ObRawExpr *expr = value_list.at(i);
         bool is_generated_column = true;
         // Mysql only allows updating generated columns to their default value
-        if (OB_FAIL(check_basic_column_generated(ref_expr, stmt, is_generated_column))) {
+        if (OB_FAIL(check_ai_column_assignment(params_, *stmt, *ref_expr))) {
+        } else if (OB_FAIL(check_basic_column_generated(ref_expr, stmt, is_generated_column))) {
         } else {
           if (T_DEFAULT == expr->get_expr_type()) {
             ObDefaultValueUtils utils(stmt, &params_, this);
@@ -484,7 +486,7 @@ int ObDelUpdResolver::check_update_vector_col_with_vector_index(const ObTableSch
 int ObDelUpdResolver::resolve_additional_assignments(ObIArray<ObTableAssignment> &assigns,
                                                      const ObStmtScope scope)
 {
-  int ret = OB_SUCCESS;
+  int ret = resolve_ai_assignments(assigns);
   ObSchemaGetterGuard *schema_guard = NULL;
   const ObTableSchema* table_schema = NULL;
   const TableItem *table_item = NULL;
@@ -2158,6 +2160,7 @@ int ObDelUpdResolver::resolve_insert_columns(const ParseNode *node,
         ret = OB_ERR_UNEXPECTED;
       } else if (FALSE_IT(column_expr = static_cast<ObColumnRefRawExpr*>(ref_expr))) {
         //do nothing
+      } else if (OB_FAIL(check_ai_column_assignment(params_, *del_upd_stmt, *column_expr))) {
       } else if (OB_FAIL(check_insert_column_duplicate(column_expr->get_column_id(), is_duplicate))) {
       } else if (is_duplicate) {
         ret = OB_ERR_FIELD_SPECIFIED_TWICE;
@@ -2340,6 +2343,7 @@ int ObDelUpdResolver::resolve_insert_values(const ParseNode *node,
                 }
               } else if (OB_FAIL(utils.resolve_default_expr(*column_item, expr, T_INSERT_SCOPE))) {
               }
+            } else if (OB_FAIL(check_ai_column_assignment(params_, *del_upd_stmt, *column_expr))) {
             } else if (OB_FAIL(check_basic_column_generated(column_expr, del_upd_stmt,
                                                             is_generated_column))) {
             } else if (is_generated_column) {

@@ -134,6 +134,9 @@ int ObExprAIEmbed::eval_ai_embed(const ObExpr &expr, ObEvalCtx &ctx, ObDatum &re
                    model_id, temp_allocator, resolved_endpoint))) {
     } else {
       ObAIFuncModel model(temp_allocator, *info, *endpoint_info);
+      if (ctx.exec_ctx_.get_my_session() != nullptr && ctx.exec_ctx_.get_my_session()->is_ai_column_internal()) {
+        model.set_http_retries(0);
+      }
       ObString result;
       if (OB_FAIL(model.call_dense_embedding(content, config, result))) {
       } else if (OB_FAIL(ObAIFuncUtils::set_string_result(expr, ctx, res, result))) {
@@ -242,6 +245,9 @@ int ObExprAIEmbed::eval_ai_embed_batch(const ObExpr &expr, ObEvalCtx &ctx,
       } else if (OB_FAIL(resolver->resolve_by_model_name(models.at(first), allocator, endpoint))) {
       } else {
         ObAIFuncModel model(allocator, *info, endpoint);
+        if (ctx.exec_ctx_.get_my_session() != nullptr && ctx.exec_ctx_.get_my_session()->is_ai_column_internal()) {
+          model.set_http_retries(0);
+        }
         if (OB_FAIL(model.call_dense_embedding_vector_v2(inputs, config, outputs))) {
         } else if (outputs.count() != positions.count()) {
           ret = OB_INVALID_DATA;
