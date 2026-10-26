@@ -249,6 +249,7 @@ from powercontext.builtin.runtime.recall_sufficiency import (
     build_recall_candidates,
     recall_effort,
 )
+from powercontext.builtin.runtime.source_lifecycle import SourceLifecycleApplication, SourceLifecycleError
 from powercontext.builtin.runtime.statistics import RelationalScopedStatistics, overview_selection
 from powercontext.builtin.scope import ScopeApplication, ScopeDescriptor, ScopeSelection
 from powercontext.builtin.scope.subject_sources import SubjectSourceService
@@ -3041,6 +3042,7 @@ class BuiltinRuntime:
         remote_ingestion: RemoteIngestion | None = None,
         dream_service: DreamService | None = None,
         generation_concurrency: int = 4,
+        lifecycle_factory: Callable[[BuiltinRuntime], SourceLifecycleApplication] | None = None,
     ) -> None:
         if source_window_limit < 1:
             raise _RuntimeConfigurationError("source_window_limit")
@@ -3049,6 +3051,7 @@ class BuiltinRuntime:
         if scope_cache_size < 1:
             raise _RuntimeConfigurationError("scope_cache_size")
         self._provider = provider
+        self._source_lifecycle = None if lifecycle_factory is None else lifecycle_factory(self)
         self._capabilities = capabilities
         self._review_service = review_service
         self.profiles = profiles
@@ -3136,6 +3139,12 @@ class BuiltinRuntime:
         self.experience_processor = (
             None if scope_ids is None or experience_incubator is None else ScheduledExperienceProcessor(self, scope_ids)
         )
+
+    @property
+    def lifecycle(self) -> SourceLifecycleApplication:
+        if self._source_lifecycle is None:
+            raise SourceLifecycleError("Lifecycle persistence is unavailable")  # noqa: TRY003
+        return self._source_lifecycle
 
     async def __aenter__(self) -> BuiltinRuntime:
         return self

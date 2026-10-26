@@ -34,9 +34,14 @@ You decide what will matter later and what needs to move with the task. PowerCon
 - Wrap an embedding provider with `CoalescingEmbeddingModel` to share concurrent work, cache successful vectors and retain usage.
 - Capture complete Pi session branches with restartable checkpoints and immutable original events.
 - Transfer ordinary prepared context as verified UTF-8 packs and prefix deltas through the Python Runtime.
+- Parse complete PDFs into revision-specific physical pages and retrieve exact page citations.
+- Select literal evidence fragments by query within the complete UTF-8 output budget.
+- Trigger Memory processing by durable Source counts and propagate Source withdrawal/restoration through dependency graphs.
+- Retrieve seekdb's full-text and vector candidates in one native SQL statement.
 
 See [CSV and inference adapters](docs/en/development/csv-and-inference.md) for Python examples and behavior.
 See [Pi history and context packs](docs/en/development/pi-and-context-packs.md) for branch recovery and wire encoding.
+See [Evidence processing and lifecycle](docs/en/development/evidence-processing.md) for PDF ingestion, selection and availability.
 
 ## Install, configure, and connect your Agent
 

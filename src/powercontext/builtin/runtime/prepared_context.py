@@ -28,6 +28,7 @@ from powercontext.builtin.artifacts.memory.models import MemoryCitation, MemoryH
 from powercontext.builtin.artifacts.profile.models import Profile
 from powercontext.builtin.artifacts.topic_memory import TopicMemory, TopicMemorySearchHit
 from powercontext.builtin.runtime.errors import PreparedContextInvariantError
+from powercontext.builtin.runtime.evidence_selection import MemoryEvidenceFragment, build_evidence_context
 from powercontext.builtin.runtime.models import PrepareContextRequest, PreparedContext
 from powercontext.builtin.runtime.prepared_code import (
     CodeEvidenceRef,
@@ -106,6 +107,7 @@ class PreparedContextBuild:
     origins: tuple[PreparedContextOrigin, ...]
     omissions: PreparedContextOmissions = PreparedContextOmissions()
     code_origins: tuple[CodeEvidenceRef, ...] = ()
+    fragments: tuple[MemoryEvidenceFragment, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -211,6 +213,10 @@ class PreparedContextBuilder:
         profile_candidates: Sequence[PreparedProfileCandidate] = (),
         code_candidates: Sequence[PreparedCodeCandidate] = (),
     ) -> PreparedContextBuild:
+        if request.evidence_selection:
+            if sum(len(group.hits) for group in memory_candidates) > self.memory_candidate_limit:
+                raise PreparedContextInvariantError("memory-candidate-limit")
+            return build_evidence_context(request, current_scope_id, memory_candidates)
         if request.include_code:
 
             def historical(history_request: PrepareContextRequest, entries: int) -> PreparedContextBuild:
@@ -274,9 +280,20 @@ class PreparedContextBuilder:
 
         Pure and side-effect free: no I/O, no persistence, nothing reported to any sink, and
         the same inputs as :meth:`build_scopes_result` are guaranteed to yield the same
-        counters because both go through :meth:`_select_entries`.
+        counters because both use the same selection policy.
         """
 
+        if request.evidence_selection:
+            selected = self.build_scopes_result(
+                request=request, current_scope_id=current_scope_id, memory_candidates=memory_candidates
+            )
+            return RecallBudgetView(
+                max_bytes=request.max_bytes,
+                delivered_items=len(selected.origins),
+                truncated_items=0,
+                dropped_items=0,
+                unused_bytes=max(0, request.max_bytes - selected.context.content_bytes),
+            )
         content, origins, omissions = self._select_entries(
             request=request,
             current_scope_id=current_scope_id,
