@@ -1,0 +1,2 @@
+Near Knowledge: http://127.0.0.1:18779 — seekdb ready, inference stays in the browser
+Near Knowledge: http://127.0.0.1:18779 — seekdb ready, inference stays in the browser

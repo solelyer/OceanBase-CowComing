@@ -1,0 +1,1506 @@
+{
+  "startedAt": "2026-10-26T09:52:35.499Z",
+  "mode": "wasm",
+  "quick": false,
+  "output": "/home/ganzw/oceanbase/powercontext-ecosystem/stepfun/test-results/2026-10-26T09-52-35-497Z-wasm",
+  "node": "v22.23.2",
+  "os": {
+    "release": "6.8.0-59-generic",
+    "arch": "x64",
+    "cpu": "Intel(R) Xeon(R) Platinum 8358P CPU @ 2.60GHz",
+    "logicalCpus": 128
+  },
+  "checks": [
+    {
+      "name": "actual browser inference backend selected",
+      "passed": true
+    },
+    {
+      "name": "UI imports actual sample into seekdb",
+      "passed": true
+    },
+    {
+      "name": "UI returns native hybrid results with genuine source text",
+      "passed": true
+    },
+    {
+      "name": "mobile page has no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "fp32/wasm returns finite vectors and satisfies public example Recall@3 >= 0.75",
+      "passed": true
+    },
+    {
+      "name": "q8/wasm returns finite vectors and satisfies public example Recall@3 >= 0.75",
+      "passed": true
+    },
+    {
+      "name": "re-import deduplicates identical records",
+      "passed": true
+    },
+    {
+      "name": "incremental file is searchable after index refresh",
+      "passed": true
+    },
+    {
+      "name": "collections remain isolated during switching",
+      "passed": true
+    },
+    {
+      "name": "actual server restart preserves documents and collection state",
+      "passed": true
+    },
+    {
+      "name": "seekdb-js native hybrid query and refresh have actual audit records",
+      "passed": true
+    },
+    {
+      "name": "no external browser inference or model requests",
+      "passed": true
+    },
+    {
+      "name": "no uncaught page errors",
+      "passed": true
+    }
+  ],
+  "configurations": [
+    {
+      "dtype": "fp32",
+      "backend": "wasm",
+      "adapter": null,
+      "modelLoad": {
+        "backend": "wasm",
+        "dtype": "fp32",
+        "requestedDevice": "wasm",
+        "adapter": null,
+        "fallbackReason": "",
+        "loadMs": 1151.3149999976158,
+        "model": "Xenova/bge-small-zh-v1.5",
+        "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+        "threads": 4
+      },
+      "ingestion": {
+        "operation": "import",
+        "name": "benchmark_fp32",
+        "rows": 16,
+        "embeddingMs": 628.2450000047684,
+        "writeMs": 160.3524950000001,
+        "refreshMs": 503.46416900000077,
+        "totalMs": 1366.7200000286102,
+        "backend": "wasm",
+        "dtype": "fp32"
+      },
+      "queries": [
+        {
+          "repeat": 0,
+          "query": "怎样让手冲咖啡不那么酸？",
+          "relevant": [
+            "coffee_acid"
+          ],
+          "found": [
+            "coffee_acid",
+            "plant_light",
+            "plant_water"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 36.27500003576279,
+          "searchMs": 35.81781000000046,
+          "totalMs": 89.14500004053116
+        },
+        {
+          "repeat": 0,
+          "query": "怎样防止重复请求造成重复扣款？",
+          "relevant": [
+            "idempotency"
+          ],
+          "found": [
+            "idempotency",
+            "payment_timeout",
+            "index_refresh"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 41.65000003576279,
+          "searchMs": 10.643099999999322,
+          "totalMs": 72.66500002145767
+        },
+        {
+          "repeat": 0,
+          "query": "共享分支里已经推送的错误修改怎么撤销？",
+          "relevant": [
+            "git_revert"
+          ],
+          "found": [
+            "git_revert",
+            "git_branch",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 36.844999969005585,
+          "searchMs": 11.705540000000838,
+          "totalMs": 66.70999997854233
+        },
+        {
+          "repeat": 0,
+          "query": "室内植物叶片变黄而且盆土一直很湿怎么办？",
+          "relevant": [
+            "plant_water"
+          ],
+          "found": [
+            "plant_water",
+            "plant_light",
+            "idempotency"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 35.330000042915344,
+          "searchMs": 11.329553999999916,
+          "totalMs": 63.625
+        },
+        {
+          "repeat": 0,
+          "query": "怎样核对文档向量化没有调用云端服务？",
+          "relevant": [
+            "browser_privacy"
+          ],
+          "found": [
+            "browser_privacy",
+            "quantization",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 37.030000030994415,
+          "searchMs": 11.065886999998838,
+          "totalMs": 64.93999999761581
+        },
+        {
+          "repeat": 0,
+          "query": "新文档导入后为什么还要等待才能搜到？",
+          "relevant": [
+            "index_refresh"
+          ],
+          "found": [
+            "index_refresh",
+            "rag_sources",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 34.54000002145767,
+          "searchMs": 10.952963999998246,
+          "totalMs": 61.55000001192093
+        },
+        {
+          "repeat": 0,
+          "query": "问答系统怎样让用户核对答案的原始依据？",
+          "relevant": [
+            "rag_sources"
+          ],
+          "found": [
+            "rag_sources",
+            "browser_privacy",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 36.769999980926514,
+          "searchMs": 11.099984000000404,
+          "totalMs": 63.535000026226044
+        },
+        {
+          "repeat": 0,
+          "query": "如何公平比较压缩模型后的检索效果？",
+          "relevant": [
+            "quantization"
+          ],
+          "found": [
+            "quantization",
+            "browser_privacy",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 30.990000009536743,
+          "searchMs": 11.225464000001011,
+          "totalMs": 58.19999998807907
+        },
+        {
+          "repeat": 1,
+          "query": "怎样让手冲咖啡不那么酸？",
+          "relevant": [
+            "coffee_acid"
+          ],
+          "found": [
+            "coffee_acid",
+            "plant_light",
+            "plant_water"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 26.5,
+          "searchMs": 10.79904600000009,
+          "totalMs": 51.985000014305115
+        },
+        {
+          "repeat": 1,
+          "query": "怎样防止重复请求造成重复扣款？",
+          "relevant": [
+            "idempotency"
+          ],
+          "found": [
+            "idempotency",
+            "payment_timeout",
+            "index_refresh"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 33.814999997615814,
+          "searchMs": 10.552845000000161,
+          "totalMs": 58.8299999833107
+        },
+        {
+          "repeat": 1,
+          "query": "共享分支里已经推送的错误修改怎么撤销？",
+          "relevant": [
+            "git_revert"
+          ],
+          "found": [
+            "git_revert",
+            "git_branch",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 36.72500002384186,
+          "searchMs": 10.91305999999895,
+          "totalMs": 62.69499999284744
+        },
+        {
+          "repeat": 1,
+          "query": "室内植物叶片变黄而且盆土一直很湿怎么办？",
+          "relevant": [
+            "plant_water"
+          ],
+          "found": [
+            "plant_water",
+            "plant_light",
+            "idempotency"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 33.910000026226044,
+          "searchMs": 10.869254000001092,
+          "totalMs": 59.1599999666214
+        },
+        {
+          "repeat": 1,
+          "query": "怎样核对文档向量化没有调用云端服务？",
+          "relevant": [
+            "browser_privacy"
+          ],
+          "found": [
+            "browser_privacy",
+            "quantization",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 31.49500000476837,
+          "searchMs": 10.321864999999889,
+          "totalMs": 56.230000019073486
+        },
+        {
+          "repeat": 1,
+          "query": "新文档导入后为什么还要等待才能搜到？",
+          "relevant": [
+            "index_refresh"
+          ],
+          "found": [
+            "index_refresh",
+            "rag_sources",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 30.5900000333786,
+          "searchMs": 10.28472099999999,
+          "totalMs": 55.31999999284744
+        },
+        {
+          "repeat": 1,
+          "query": "问答系统怎样让用户核对答案的原始依据？",
+          "relevant": [
+            "rag_sources"
+          ],
+          "found": [
+            "rag_sources",
+            "browser_privacy",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 32.2950000166893,
+          "searchMs": 10.787908000000243,
+          "totalMs": 55.64500004053116
+        },
+        {
+          "repeat": 1,
+          "query": "如何公平比较压缩模型后的检索效果？",
+          "relevant": [
+            "quantization"
+          ],
+          "found": [
+            "quantization",
+            "browser_privacy",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.689999997615814,
+          "searchMs": 10.441947999999684,
+          "totalMs": 52.00999999046326
+        },
+        {
+          "repeat": 2,
+          "query": "怎样让手冲咖啡不那么酸？",
+          "relevant": [
+            "coffee_acid"
+          ],
+          "found": [
+            "coffee_acid",
+            "plant_light",
+            "plant_water"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 29.149999976158142,
+          "searchMs": 10.147453999999925,
+          "totalMs": 53.87999999523163
+        },
+        {
+          "repeat": 2,
+          "query": "怎样防止重复请求造成重复扣款？",
+          "relevant": [
+            "idempotency"
+          ],
+          "found": [
+            "idempotency",
+            "payment_timeout",
+            "index_refresh"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 31.75,
+          "searchMs": 10.187340000000404,
+          "totalMs": 56.139999985694885
+        },
+        {
+          "repeat": 2,
+          "query": "共享分支里已经推送的错误修改怎么撤销？",
+          "relevant": [
+            "git_revert"
+          ],
+          "found": [
+            "git_revert",
+            "git_branch",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 32.42500001192093,
+          "searchMs": 11.15351499999997,
+          "totalMs": 58.69999998807907
+        },
+        {
+          "repeat": 2,
+          "query": "室内植物叶片变黄而且盆土一直很湿怎么办？",
+          "relevant": [
+            "plant_water"
+          ],
+          "found": [
+            "plant_water",
+            "plant_light",
+            "idempotency"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 37.064999997615814,
+          "searchMs": 11.5646629999992,
+          "totalMs": 65.16000002622604
+        },
+        {
+          "repeat": 2,
+          "query": "怎样核对文档向量化没有调用云端服务？",
+          "relevant": [
+            "browser_privacy"
+          ],
+          "found": [
+            "browser_privacy",
+            "quantization",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 32.125,
+          "searchMs": 10.981821999999738,
+          "totalMs": 58.02499997615814
+        },
+        {
+          "repeat": 2,
+          "query": "新文档导入后为什么还要等待才能搜到？",
+          "relevant": [
+            "index_refresh"
+          ],
+          "found": [
+            "index_refresh",
+            "rag_sources",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 29.980000019073486,
+          "searchMs": 10.913736000000426,
+          "totalMs": 56.69499999284744
+        },
+        {
+          "repeat": 2,
+          "query": "问答系统怎样让用户核对答案的原始依据？",
+          "relevant": [
+            "rag_sources"
+          ],
+          "found": [
+            "rag_sources",
+            "browser_privacy",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 31.2049999833107,
+          "searchMs": 20.691257000000405,
+          "totalMs": 68.00999999046326
+        },
+        {
+          "repeat": 2,
+          "query": "如何公平比较压缩模型后的检索效果？",
+          "relevant": [
+            "quantization"
+          ],
+          "found": [
+            "quantization",
+            "browser_privacy",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 36.80500000715256,
+          "searchMs": 11.490524999999252,
+          "totalMs": 65.11500000953674
+        }
+      ],
+      "recallAt3": 1,
+      "medianEmbeddingMs": 33.814999997615814,
+      "medianSearchMs": 10.952963999998246,
+      "medianTotalMs": 59.1599999666214
+    },
+    {
+      "dtype": "q8",
+      "backend": "wasm",
+      "adapter": null,
+      "modelLoad": {
+        "backend": "wasm",
+        "dtype": "q8",
+        "requestedDevice": "wasm",
+        "adapter": null,
+        "fallbackReason": "",
+        "loadMs": 145.9749999642372,
+        "model": "Xenova/bge-small-zh-v1.5",
+        "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+        "threads": 4
+      },
+      "ingestion": {
+        "operation": "import",
+        "name": "my_notes",
+        "rows": 16,
+        "embeddingMs": 358,
+        "writeMs": 141.4324889999989,
+        "refreshMs": 602.830621000001,
+        "totalMs": 1166.6899999976158,
+        "backend": "wasm",
+        "dtype": "q8"
+      },
+      "queries": [
+        {
+          "repeat": 0,
+          "query": "怎样让手冲咖啡不那么酸？",
+          "relevant": [
+            "coffee_acid"
+          ],
+          "found": [
+            "coffee_acid",
+            "plant_light",
+            "plant_water"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 26.710000038146973,
+          "searchMs": 11.435491000000184,
+          "totalMs": 54.10000002384186
+        },
+        {
+          "repeat": 0,
+          "query": "怎样防止重复请求造成重复扣款？",
+          "relevant": [
+            "idempotency"
+          ],
+          "found": [
+            "idempotency",
+            "payment_timeout",
+            "index_refresh"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 25.92500001192093,
+          "searchMs": 11.403709999998682,
+          "totalMs": 53.219999969005585
+        },
+        {
+          "repeat": 0,
+          "query": "共享分支里已经推送的错误修改怎么撤销？",
+          "relevant": [
+            "git_revert"
+          ],
+          "found": [
+            "git_revert",
+            "git_branch",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.0450000166893,
+          "searchMs": 10.805217999999513,
+          "totalMs": 52.73499995470047
+        },
+        {
+          "repeat": 0,
+          "query": "室内植物叶片变黄而且盆土一直很湿怎么办？",
+          "relevant": [
+            "plant_water"
+          ],
+          "found": [
+            "plant_water",
+            "plant_light",
+            "idempotency"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 26.060000002384186,
+          "searchMs": 10.822597000000314,
+          "totalMs": 51.4549999833107
+        },
+        {
+          "repeat": 0,
+          "query": "怎样核对文档向量化没有调用云端服务？",
+          "relevant": [
+            "browser_privacy"
+          ],
+          "found": [
+            "browser_privacy",
+            "quantization",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 28.1700000166893,
+          "searchMs": 10.736640000000989,
+          "totalMs": 53.064999997615814
+        },
+        {
+          "repeat": 0,
+          "query": "新文档导入后为什么还要等待才能搜到？",
+          "relevant": [
+            "index_refresh"
+          ],
+          "found": [
+            "index_refresh",
+            "rag_sources",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.069999992847443,
+          "searchMs": 10.87793000000056,
+          "totalMs": 52.660000026226044
+        },
+        {
+          "repeat": 0,
+          "query": "问答系统怎样让用户核对答案的原始依据？",
+          "relevant": [
+            "rag_sources"
+          ],
+          "found": [
+            "rag_sources",
+            "browser_privacy",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 26.93499994277954,
+          "searchMs": 11.46502800000053,
+          "totalMs": 53.94499999284744
+        },
+        {
+          "repeat": 0,
+          "query": "如何公平比较压缩模型后的检索效果？",
+          "relevant": [
+            "quantization"
+          ],
+          "found": [
+            "quantization",
+            "browser_privacy",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.009999990463257,
+          "searchMs": 11.062465999999404,
+          "totalMs": 52.4549999833107
+        },
+        {
+          "repeat": 1,
+          "query": "怎样让手冲咖啡不那么酸？",
+          "relevant": [
+            "coffee_acid"
+          ],
+          "found": [
+            "coffee_acid",
+            "plant_light",
+            "plant_water"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 24.725000023841858,
+          "searchMs": 10.737322999999378,
+          "totalMs": 49.55000001192093
+        },
+        {
+          "repeat": 1,
+          "query": "怎样防止重复请求造成重复扣款？",
+          "relevant": [
+            "idempotency"
+          ],
+          "found": [
+            "idempotency",
+            "payment_timeout",
+            "index_refresh"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 26.0799999833107,
+          "searchMs": 10.756593999998586,
+          "totalMs": 53.25499999523163
+        },
+        {
+          "repeat": 1,
+          "query": "共享分支里已经推送的错误修改怎么撤销？",
+          "relevant": [
+            "git_revert"
+          ],
+          "found": [
+            "git_revert",
+            "git_branch",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.714999973773956,
+          "searchMs": 11.222544000000198,
+          "totalMs": 52.910000026226044
+        },
+        {
+          "repeat": 1,
+          "query": "室内植物叶片变黄而且盆土一直很湿怎么办？",
+          "relevant": [
+            "plant_water"
+          ],
+          "found": [
+            "plant_water",
+            "plant_light",
+            "idempotency"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.24500000476837,
+          "searchMs": 10.91164899999967,
+          "totalMs": 54.549999952316284
+        },
+        {
+          "repeat": 1,
+          "query": "怎样核对文档向量化没有调用云端服务？",
+          "relevant": [
+            "browser_privacy"
+          ],
+          "found": [
+            "browser_privacy",
+            "quantization",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.87999999523163,
+          "searchMs": 10.574903999999151,
+          "totalMs": 51.97000002861023
+        },
+        {
+          "repeat": 1,
+          "query": "新文档导入后为什么还要等待才能搜到？",
+          "relevant": [
+            "index_refresh"
+          ],
+          "found": [
+            "index_refresh",
+            "rag_sources",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 25.915000021457672,
+          "searchMs": 10.762870999998995,
+          "totalMs": 52.38499999046326
+        },
+        {
+          "repeat": 1,
+          "query": "问答系统怎样让用户核对答案的原始依据？",
+          "relevant": [
+            "rag_sources"
+          ],
+          "found": [
+            "rag_sources",
+            "browser_privacy",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.435000002384186,
+          "searchMs": 10.611887000000934,
+          "totalMs": 51.30500000715256
+        },
+        {
+          "repeat": 1,
+          "query": "如何公平比较压缩模型后的检索效果？",
+          "relevant": [
+            "quantization"
+          ],
+          "found": [
+            "quantization",
+            "browser_privacy",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 26.735000014305115,
+          "searchMs": 10.439276999999493,
+          "totalMs": 50.389999985694885
+        },
+        {
+          "repeat": 2,
+          "query": "怎样让手冲咖啡不那么酸？",
+          "relevant": [
+            "coffee_acid"
+          ],
+          "found": [
+            "coffee_acid",
+            "plant_light",
+            "plant_water"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 24.930000007152557,
+          "searchMs": 10.424063000000388,
+          "totalMs": 50.80000001192093
+        },
+        {
+          "repeat": 2,
+          "query": "怎样防止重复请求造成重复扣款？",
+          "relevant": [
+            "idempotency"
+          ],
+          "found": [
+            "idempotency",
+            "payment_timeout",
+            "index_refresh"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 24.37999999523163,
+          "searchMs": 10.27758300000096,
+          "totalMs": 48.11999994516373
+        },
+        {
+          "repeat": 2,
+          "query": "共享分支里已经推送的错误修改怎么撤销？",
+          "relevant": [
+            "git_revert"
+          ],
+          "found": [
+            "git_revert",
+            "git_branch",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 25.305000007152557,
+          "searchMs": 10.505452000001242,
+          "totalMs": 48.875
+        },
+        {
+          "repeat": 2,
+          "query": "室内植物叶片变黄而且盆土一直很湿怎么办？",
+          "relevant": [
+            "plant_water"
+          ],
+          "found": [
+            "plant_water",
+            "plant_light",
+            "idempotency"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.230000019073486,
+          "searchMs": 10.531514000000243,
+          "totalMs": 50.985000014305115
+        },
+        {
+          "repeat": 2,
+          "query": "怎样核对文档向量化没有调用云端服务？",
+          "relevant": [
+            "browser_privacy"
+          ],
+          "found": [
+            "browser_privacy",
+            "quantization",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.84500002861023,
+          "searchMs": 10.879859000000579,
+          "totalMs": 54.2049999833107
+        },
+        {
+          "repeat": 2,
+          "query": "新文档导入后为什么还要等待才能搜到？",
+          "relevant": [
+            "index_refresh"
+          ],
+          "found": [
+            "index_refresh",
+            "rag_sources",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 26.189999997615814,
+          "searchMs": 10.296098000000711,
+          "totalMs": 49.97000002861023
+        },
+        {
+          "repeat": 2,
+          "query": "问答系统怎样让用户核对答案的原始依据？",
+          "relevant": [
+            "rag_sources"
+          ],
+          "found": [
+            "rag_sources",
+            "browser_privacy",
+            "rag_chunk"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 27.67500001192093,
+          "searchMs": 10.54793299999983,
+          "totalMs": 54.394999980926514
+        },
+        {
+          "repeat": 2,
+          "query": "如何公平比较压缩模型后的检索效果？",
+          "relevant": [
+            "quantization"
+          ],
+          "found": [
+            "quantization",
+            "browser_privacy",
+            "rag_sources"
+          ],
+          "recallAt3": 1,
+          "embeddingMs": 26.209999978542328,
+          "searchMs": 10.732061999999132,
+          "totalMs": 50.99500000476837
+        }
+      ],
+      "recallAt3": 1,
+      "medianEmbeddingMs": 26.93499994277954,
+      "medianSearchMs": 10.756593999998586,
+      "medianTotalMs": 52.4549999833107
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "network": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/assets/index-CWlbBKGA.js"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/assets/index-C9ZrmMLN.css"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/assets/embed-worker-Cvv6XBTw.js"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/model.json"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/config.json"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/tokenizer_config.json"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/onnx/model_quantized.onnx"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/tokenizer.json"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/tokenizer.json"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/tokenizer_config.json"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/onnx/model_quantized.onnx"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.mjs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.mjs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.mjs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.mjs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.wasm"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/sample.json"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/documents"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/onnx/model.onnx"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/models/bge-small-zh-v1.5/onnx/model.onnx"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/documents"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/benchmark_fp32/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/documents"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/documents"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/documents"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/isolated_space/documents"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/isolated_space/search"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/assets/index-CWlbBKGA.js"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/assets/index-C9ZrmMLN.css"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/api/spaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/assets/embed-worker-Cvv6XBTw.js"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/model.json"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.mjs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.mjs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.mjs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.mjs"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18777/ort/ort-wasm-simd-threaded.asyncify.wasm"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:18777/api/spaces/my_notes/search"
+    }
+  ],
+  "sourceHashes": {
+    "server.mjs": "5d8bb965340b738ea7ddbdd1ed2e701ed2f5b8cd1b87d774bcc1062482a3f538",
+    "src/main.js": "2779b7effd2d7f0b5f4d655ac7ca4dabbb1900996a2dcf5232af165d22c1207c",
+    "src/embed-worker.js": "2eb6a2c934a9c486c53c34cbebee72f8040ba1db8dfaeb94cd91bf89f6468f6a",
+    "lib/contracts.mjs": "a33480e3b66c981b4ff93c2377e9d725efcd7cfad0837e5c21868eb7028339a4",
+    "scripts/start-database.mjs": "b0b15e0dcd614be06ed1392d691f9f6054297f749a6637fa8b0ecc23430fb7ba",
+    "package-lock.json": "a5665c4ed5c542493a2f14b5306aa453607b1a3aebbf6c55bbaf2070ecb80e36",
+    "model.json": "1b715c103c5b90d0cae27e39db25d7524b0cd70b6d3490aaf21b6b4bfd94eb02",
+    "sample.json": "4a1169c4e2919c9152d2fdb764e48891df1b0ce07a8a3365753d967b9cd33d5e",
+    "tests/browser.mjs": "06df8267d54de7137e6e3b0a0040ef74379fbf5155d7d9d0e18d9e9f6296d873"
+  },
+  "server": {
+    "ok": true,
+    "pid": 574184,
+    "sdk": "seekdb@1.4.0",
+    "databaseVersion": [
+      {
+        "version": "5.7.25-OceanBase seekdb-v1.4.0.0"
+      }
+    ],
+    "databaseName": "kb_20261026t095235497z_wasm",
+    "mode": "server",
+    "model": {
+      "repository": "Xenova/bge-small-zh-v1.5",
+      "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+      "localName": "bge-small-zh-v1.5",
+      "dimension": 512,
+      "pooling": "cls",
+      "normalize": true,
+      "license": "MIT",
+      "upstream": "BAAI/bge-small-zh-v1.5",
+      "files": {
+        "config.json": {
+          "bytes": 716
+        },
+        "tokenizer.json": {
+          "bytes": 439125
+        },
+        "tokenizer_config.json": {
+          "bytes": 367
+        },
+        "special_tokens_map.json": {
+          "bytes": 125
+        },
+        "onnx/model.onnx": {
+          "bytes": 94851877,
+          "sha256": "69a0b846f4f116b5e6aabf9546ea6754d02264f3211a13a1bd69b31b8040749a"
+        },
+        "onnx/model_quantized.onnx": {
+          "bytes": 24010842,
+          "sha256": "15b717c382bcb518ba457b93ea6850ede7f4f1cd8937454aa06972366cd19bcc"
+        }
+      }
+    },
+    "inference": "browser-only"
+  },
+  "browser": "151.0.7922.34",
+  "browserArgs": [
+    "--disable-gpu",
+    "--disable-features=WebGPU"
+  ],
+  "firstModelLoad": {
+    "backend": "wasm",
+    "dtype": "q8",
+    "requestedDevice": "wasm",
+    "adapter": null,
+    "fallbackReason": "",
+    "loadMs": 1354.7350000143051,
+    "model": "Xenova/bge-small-zh-v1.5",
+    "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+    "threads": 4
+  },
+  "firstUiImport": {
+    "operation": "import",
+    "name": "my_notes",
+    "rows": 16,
+    "embeddingMs": 499.914999961853,
+    "writeMs": 339.62302100000034,
+    "refreshMs": 534.0183569999999,
+    "totalMs": 1441.1299999952316,
+    "backend": "wasm",
+    "dtype": "q8"
+  },
+  "firstUiQuery": {
+    "hits": [
+      {
+        "id": "ae06020f05843eeb734fcac1ea17aef6344bfa62ab93bc6f59fd54fd363a94ab",
+        "text": "手冲咖啡出现尖锐酸味，常见原因是萃取不足。可以适当提高水温、磨细研磨度，或者延长粉水接触时间。每次只调整一个变量并记录味道，避免同时改变水温和粉水比例。浅烘豆本身也会保留果酸，应区分正常风味与萃取不足。",
+        "metadata": {
+          "part": 1,
+          "source": "手冲笔记 · 酸味与萃取",
+          "sourceId": "coffee_acid"
+        },
+        "score": 0.0328
+      },
+      {
+        "id": "2988240cd9028afa66efa6f6ac35b062b9936b228f9ead7370324adae3e520a7",
+        "text": "耐阴植物也需要适量散射光。新买的植物应逐步适应更强光线，避免突然暴晒导致叶片灼伤。定期转动花盆，让各方向生长均匀，并根据植物种类调整摆放位置。",
+        "metadata": {
+          "part": 1,
+          "source": "阳台园艺 · 光照",
+          "sourceId": "plant_light"
+        },
+        "score": 0.0311
+      },
+      {
+        "id": "ef6fa60170d9a571e3b3ce2ea65fc6a9a031e24e095b0f7c61d5e61aa0ae7db8",
+        "text": "给室内盆栽浇水应观察土壤干湿，而不是严格按日历执行。表层下两到三厘米干燥时再充分浇透，排掉托盘积水。持续积水会让根部缺氧，出现黄叶和烂根；冬季通常需要减少浇水频率。",
+        "metadata": {
+          "part": 1,
+          "source": "阳台园艺 · 浇水判断",
+          "sourceId": "plant_water"
+        },
+        "score": 0.0308
+      },
+      {
+        "id": "f5d2915a0d723dad43d905a7cd02b5495b23acee9aea3eb54f3a5de474f3e0b5",
+        "text": "检索增强应用应保留文档标识、版本和段落位置，让每条回答能回到原文。导入时记录来源与内容摘要，展示检索结果时附上原文片段和出处。资料更新后应重建相关索引，避免旧版本参与回答。",
+        "metadata": {
+          "part": 1,
+          "source": "知识库设计 · 可追溯引用",
+          "sourceId": "rag_sources"
+        },
+        "score": 0.0304
+      },
+      {
+        "id": "141ce28d0dfa35c00f2d9b6685cecd498ad89e333baf5bc722901574abf74008",
+        "text": "咖啡豆应密封、避光、远离高温和潮湿，按一到两周的用量分装。不要把每天开启的豆罐放入冰箱，以免温差带来凝结水。购买时记录烘焙日期，排气结束后再按个人口味开始饮用。",
+        "metadata": {
+          "part": 1,
+          "source": "手冲笔记 · 咖啡豆保存",
+          "sourceId": "coffee_storage"
+        },
+        "score": 0.0161
+      }
+    ],
+    "searchMs": 60.24783899999966,
+    "count": 16,
+    "fusion": "seekdb native RRF",
+    "operation": "search",
+    "query": "怎样让手冲咖啡不那么酸？",
+    "name": "my_notes",
+    "backend": "wasm",
+    "dtype": "q8",
+    "embeddingMs": 27.064999997615814,
+    "totalMs": 112.23000001907349
+  },
+  "batchComparison": [
+    {
+      "dtype": "q8",
+      "backend": "wasm",
+      "batchSize": 1,
+      "documentCount": 16,
+      "milliseconds": [
+        366.1399999856949,
+        360.1650000214577,
+        352.4150000214577
+      ],
+      "medianMs": 360.1650000214577,
+      "documentsPerSecond": 44.424083403569924
+    },
+    {
+      "dtype": "q8",
+      "backend": "wasm",
+      "batchSize": 8,
+      "documentCount": 16,
+      "milliseconds": [
+        344.1899999976158,
+        369.3449999690056,
+        311.69499999284744
+      ],
+      "medianMs": 344.1899999976158,
+      "documentsPerSecond": 46.48595252654299
+    }
+  ],
+  "serverStops": [
+    {
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "passed": true,
+  "finishedAt": "2026-10-26T09:52:55.476Z"
+}

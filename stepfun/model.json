@@ -1,0 +1,18 @@
+{
+  "repository": "Xenova/bge-small-zh-v1.5",
+  "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+  "localName": "bge-small-zh-v1.5",
+  "dimension": 512,
+  "pooling": "cls",
+  "normalize": true,
+  "license": "MIT",
+  "upstream": "BAAI/bge-small-zh-v1.5",
+  "files": {
+    "config.json": { "bytes": 716 },
+    "tokenizer.json": { "bytes": 439125 },
+    "tokenizer_config.json": { "bytes": 367 },
+    "special_tokens_map.json": { "bytes": 125 },
+    "onnx/model.onnx": { "bytes": 94851877, "sha256": "69a0b846f4f116b5e6aabf9546ea6754d02264f3211a13a1bd69b31b8040749a" },
+    "onnx/model_quantized.onnx": { "bytes": 24010842, "sha256": "15b717c382bcb518ba457b93ea6850ede7f4f1cd8937454aa06972366cd19bcc" }
+  }
+}

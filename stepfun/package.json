@@ -1,0 +1,22 @@
+{
+  "name": "near-knowledge-browser",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "prepare:model": "node scripts/download-model.mjs",
+    "db:start": "node scripts/start-database.mjs",
+    "db:wait": "node scripts/wait-database.mjs",
+    "build": "vite build",
+    "start": "node server.mjs",
+    "test": "node --test tests/contracts.test.mjs",
+    "test:browser": "node tests/browser.mjs"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "4.3.1",
+    "seekdb": "1.4.0"
+  },
+  "devDependencies": { "vite": "7.3.7", "playwright": "1.58.2" },
+  "overrides": { "adm-zip": "0.6.1", "esbuild": "0.28.1" }
+}
