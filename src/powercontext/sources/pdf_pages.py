@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field, field_validator
 from pypdf import PdfReader
 
 from powercontext.builtin.artifacts.memory.models import MemoryCitation
-from powercontext.sources._pdf_retrieval import pdf_queries, rank_pdf_hits
+from powercontext.sources._pdf_retrieval import pdf_issuer_queries, pdf_queries, rank_pdf_hits
 from powercontext.sources.definitions import AdapterSourceDefinition
 from powercontext.sources.models import Source, SourceMaterialization
 from powercontext.sources.projections import TEXT_EVIDENCE_PROJECTION_KEY, TextEvidence
@@ -146,6 +146,25 @@ async def search_pdf_pages(
         for hit in result.hits:
             identity = (hit.memory_ref.artifact_id, hit.entry_id, hit.entry_version_id)
             candidates.setdefault(identity, hit)
+    document_ids = tuple(hit.text.partition("\n")[0] for hit in candidates.values())
+    if not candidates:
+        # An issuer-only question may match no body word, while Analyzer indexes
+        # the full underscored filing ID as one token. Discover IDs from active
+        # scoped records, then retrieve their real citations through search.
+        entries = await memory.list()
+        document_ids = tuple(record.entry.text.partition("\n")[0] for record in entries.entries)
+    issuer_queries = pdf_issuer_queries(document_ids, question)
+    if issuer_queries:
+        # A fixed top-k can discard a long financial table before body reranking.
+        # Fetch the matched issuer's pages up to the real scope size instead.
+        capacity = await memory.capacity()
+        for query in issuer_queries:
+            result = await memory.search(
+                SearchMemoryRequest(query=query, mode="fts", limit=max(80, capacity.active_entry_count))
+            )
+            for hit in result.hits:
+                identity = (hit.memory_ref.artifact_id, hit.entry_id, hit.entry_version_id)
+                candidates.setdefault(identity, hit)
     return tuple(
         MemoryCitation(memory_ref=hit.memory_ref, entry_id=hit.entry_id, entry_version_id=hit.entry_version_id)
         for hit in rank_pdf_hits(tuple(candidates.values()), question)[:limit]

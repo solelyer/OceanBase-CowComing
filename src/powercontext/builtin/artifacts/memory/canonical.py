@@ -87,6 +87,25 @@ def normalize_text(value: str) -> str:
     return normalized
 
 
+def normalize_entry_text(value: str, *, kind: str, source_refs: Sequence[object]) -> str:
+    """Preserve complete captured PDF pages beyond the short-memory body budget.
+
+    Page boundaries are part of their evidence identity, so truncating or splitting
+    a page would break exact citation readback. Ordinary entries keep their bound.
+    Use this same rule for writes, content hashing and persisted-entry validation.
+    """
+
+    if (
+        kind == "source-evidence"
+        and source_refs
+        and all(
+            isinstance(reference, Mapping) and reference.get("source_type") == "pdf-page" for reference in source_refs
+        )
+    ):
+        return _normalize_non_empty_string(value, "memory entry text")
+    return normalize_text(value)
+
+
 def normalize_query(value: str) -> str:
     """Normalize one transient retrieval query.
 
@@ -158,10 +177,12 @@ def entry_content_bytes(
 ) -> bytes:
     """Return canonical content bytes for an immutable entry version."""
 
+    normalized_kind = normalize_kind(kind)
+    normalized_sources = normalize_refs(source_refs)
     return canonical_json({
-        "kind": normalize_kind(kind),
-        "text": normalize_text(text),
-        "source_refs": normalize_refs(source_refs),
+        "kind": normalized_kind,
+        "text": normalize_entry_text(text, kind=normalized_kind, source_refs=normalized_sources),
+        "source_refs": normalized_sources,
         "artifact_refs": normalize_refs(artifact_refs),
     })
 

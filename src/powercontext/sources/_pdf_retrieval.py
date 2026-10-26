@@ -105,7 +105,6 @@ _STOP = frozenset([
     "assuming",
     "assume",
     "perspective",
-    "investment",
     "analyst",
     "details",
     "shown",
@@ -149,7 +148,7 @@ _STOP = frozenset([
 # admission threshold and discard pages containing just one relevant concept.
 _CONCEPTS = (
     (
-        "geographic geography geographically geographies region country countries",
+        "geographic geography geographically geographies region country countries segment segments division divisions",
         (
             "geographic information",
             "geographical regions",
@@ -167,6 +166,8 @@ _CONCEPTS = (
     ("income profit profits earnings pnl", ("income statement", "operating profit", "net earnings")),
     ("ebitda", ("operating income", "operating profit", "depreciation amortization", "cash flows")),
     ("capex expenditure expenditures", ("capital expenditures", "capital spending", "property equipment")),
+    ("intensive intensity", ("property equipment", "capital expenditures", "total assets", "balance sheet")),
+    ("investment investments securities", ("short term", "marketable securities", "debt securities")),
     ("cash cashflow cashflows", ("cash flows", "operating activities")),
     ("margin margins", ("net revenue", "net sales", "gross profit", "operating income")),
     (
@@ -187,7 +188,9 @@ def _words(text: str) -> tuple[str, ...]:
     normalized = re.sub(r"\bfy\s*(\d{4})\b", r"\1", normalized)
     normalized = re.sub(r"\bd\s*&\s*a\b", "depreciation amortization", normalized)
     normalized = re.sub(r"\bp\s*&\s*l\b", "income statement", normalized)
-    return tuple(re.findall(r"[^\W\d_]+|\d+", normalized))
+    normalized = re.sub(r"\bpp\s*&\s*e\b", "property plant equipment", normalized)
+    normalized = re.sub(r"\binvestment analyst\b", "", normalized)
+    return tuple(re.findall(r"[^\W_]+", normalized))
 
 
 def _stem(word: str) -> str:
@@ -233,17 +236,28 @@ def pdf_queries(question: str) -> tuple[str, ...]:
 
 
 def _issuer_terms(document_id: str) -> tuple[str, ...]:
-    name = re.sub(r"\b(?:19|20)\d{2}\b|(?:19|20)\d{2}|10[ _-]?[kq]", " ", document_id.casefold())
+    # A filing suffix is not part of the issuer, including quarterly periods and
+    # dated releases. Preserve alphanumeric issuer names such as 3M.
+    name = re.split(r"[_\s-](?:19|20)\d{2}(?:q[1-4])?(?=[_\s-]|$)", document_id.casefold(), maxsplit=1)[0]
     return tuple(word for word in _words(name) if word not in _STOP and word not in {"form", "financial", "statements"})
 
 
 def _issuer_matches(document_id: str, question: str) -> bool:
     terms = _issuer_terms(document_id)
     compact_question = "".join(_words(question))
+    acronyms = {word.casefold() for word in re.findall(r"\b[A-Z][A-Z0-9]{2,7}\b", question)}
+    issuer = "".join(terms)
     return bool(terms) and (
-        "".join(terms) in compact_question
+        issuer in compact_question
         or sum(word in _words(question) for word in terms) >= max(1, math.ceil(len(terms) / 2))
+        or any(issuer.startswith(word) for word in acronyms)
     )
+
+
+def pdf_issuer_queries(document_ids: tuple[str, ...], question: str) -> tuple[str, ...]:
+    """Search complete observed filing IDs; Analyzer keeps underscores in tokens."""
+
+    return tuple(document for document in sorted(set(document_ids)) if _issuer_matches(document, question))
 
 
 def _heading_bonus(body: str, question_terms: set[str]) -> float:
@@ -274,11 +288,21 @@ def _heading_bonus(body: str, question_terms: set[str]) -> float:
         "repurchase",
     }) and re.search(r"statements? of cash flows?|cash flow statements?", heading):
         bonus += 12.0
-    if question_terms.intersection({"asset", "liability", "balance", "ratio", "liquidity", "debt"}) and re.search(
-        r"balance sheets?|statements? of financial position", heading
-    ):
+    if question_terms.intersection({
+        "asset",
+        "liability",
+        "balance",
+        "ratio",
+        "liquidity",
+        "debt",
+        "intensive",
+    }) and re.search(r"balance sheets?|statements? of financial position", heading):
         bonus += 12.0
     if "geographic" in question_terms and re.search(r"geographic|our divisions|reportable segments", heading):
+        bonus += 6.0
+    if question_terms.intersection({"segment", "division"}) and re.search(
+        r"segment (?:results|information|reporting)|business segments?|reportable segments?", heading
+    ):
         bonus += 6.0
     return bonus
 

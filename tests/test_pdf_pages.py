@@ -23,6 +23,7 @@ from pypdf import PdfWriter
 from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 
 from powercontext.builtin.artifacts.memory import MemoryEntryInput
+from powercontext.builtin.artifacts.memory.errors import InvalidMemoryCandidateError
 from powercontext.builtin.persistence.sqlite import SQLiteConfig
 from powercontext.builtin.runtime import (
     BuiltinConfig,
@@ -169,3 +170,90 @@ async def test_natural_question_retrieves_evidence_after_restart(tmp_path) -> No
         assert (await memory.get(GetMemoryEntryRequest(citation=single[0]))).entry.text == (
             "ORION_2025_10K\n" + documents["ORION_2025_10K"][0]
         )
+
+
+async def test_full_pdf_page_over_short_memory_limit_survives_restart(tmp_path) -> None:
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=600, height=800)
+    page[NameObject("/Resources")] = DictionaryObject({
+        NameObject("/Font"): DictionaryObject({
+            NameObject("/F1"): DictionaryObject({
+                NameObject("/Type"): NameObject("/Font"),
+                NameObject("/Subtype"): NameObject("/Type1"),
+                NameObject("/BaseFont"): NameObject("/Helvetica"),
+            })
+        })
+    })
+    body = b"Revenue and operating costs 001 37.25. " * 300 + b"FullPageTailMarker 976.50"
+    stream = DecodedStreamObject()
+    stream.set_data(b"BT /F1 12 Tf 20 700 Td (" + body + b") Tj ET")
+    page[NameObject("/Contents")] = writer._add_object(stream)
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    parsed = parse_pdf_document(PDFDocumentInput(document_id="LONG_REPORT_2025_10K", content=buffer.getvalue()))
+    assert len(parsed) == 1 and len(parsed[0].text.encode()) > 8192
+    registry = SourceDefinitionRegistry((PDF_PAGE_SOURCE_DEFINITION,))
+    observation = project_source_for_transport(registry, await registry.resolve(parsed[0]))
+    expected = observation.projection(TEXT_EVIDENCE_PROJECTION_KEY)["content"].strip()
+    config = BuiltinConfig(database=SQLiteConfig(url=f"sqlite+aiosqlite:///{tmp_path / 'long-page.db'}"))
+    async with open_builtin_runtime(config, candidate_pipeline=_PagePipeline()) as runtime:
+        scope = await runtime.scopes.create(ScopeDraft(title="long PDF", summary="full page", idempotency_key="long"))
+        await runtime.ingestion.register(manifest_for_definition(PDF_PAGE_SOURCE_DEFINITION))
+        request = SubmitSourceObservation(scope_id=scope.scope_id, observation=observation)
+        await runtime.ingestion.submit(request)
+        await runtime.ingestion.submit(request)
+        memory = runtime.memory.for_scope(scope.scope_id)
+        assert (await memory.flush()).processed
+        assert not (await memory.flush()).processed
+        entries = (await memory.list()).entries
+        assert len(entries) == 1 and entries[0].entry.text == expected
+        citation = entries[0].citation
+        for kind in ("fact", "source-evidence"):
+            with pytest.raises(InvalidMemoryCandidateError, match="8192 UTF-8 bytes"):
+                await memory.remember(RememberMemoryRequest(entries=(MemoryEntryInput(kind=kind, text=expected),)))
+    async with open_builtin_runtime(config) as runtime:
+        memory = runtime.memory.for_scope(scope.scope_id)
+        entry = (await memory.get(GetMemoryEntryRequest(citation=citation))).entry
+        assert entry.text == expected and entry.text.endswith("FullPageTailMarker 976.50")
+        assert len(entry.sources) == 1 and entry.sources[0].source_id == observation.name
+        hits = await search_pdf_pages(memory, "FullPageTailMarker", limit=1)
+        assert hits == (citation,)
+
+
+async def test_company_acronym_selects_its_quarterly_report(tmp_path) -> None:
+    config = BuiltinConfig(database=SQLiteConfig(url=f"sqlite+aiosqlite:///{tmp_path / 'quarter.db'}"))
+    documents = {
+        "ABCLOGISTICS_2025Q2_10Q": "Segment results\nNorth division net income 50. South division net income 10.",
+        "NOVA_2025_10K": "ABC ABC ABC industry comparison. Segment results\nNorth division net income 500. South division net income 100.",
+        "3M_2025_10K": "Operating results\nNet sales 900 and operating income 100.",
+    }
+    registry = SourceDefinitionRegistry((PDF_PAGE_SOURCE_DEFINITION,))
+    async with open_builtin_runtime(config, candidate_pipeline=_PagePipeline()) as runtime:
+        scope = await runtime.scopes.create(ScopeDraft(title="quarter", summary="companies", idempotency_key="quarter"))
+        await runtime.ingestion.register(manifest_for_definition(PDF_PAGE_SOURCE_DEFINITION))
+        for document, text in documents.items():
+            page = PDFPageInput(
+                document_id=document,
+                document_sha256=hashlib.sha256(document.encode()).hexdigest(),
+                page_number=1,
+                text=text,
+            )
+            source = await registry.resolve(page)
+            await runtime.ingestion.submit(
+                SubmitSourceObservation(
+                    scope_id=scope.scope_id, observation=project_source_for_transport(registry, source)
+                )
+            )
+        assert (await runtime.memory.for_scope(scope.scope_id).flush()).processed
+    async with open_builtin_runtime(config) as runtime:
+        memory = runtime.memory.for_scope(scope.scope_id)
+        citations = await search_pdf_pages(
+            memory, "In H1 FY2025, which of ABC's segments had the highest net income?", limit=1
+        )
+        assert len(citations) == 1
+        record = await memory.get(GetMemoryEntryRequest(citation=citations[0]))
+        assert record.entry.text == "ABCLOGISTICS_2025Q2_10Q\n" + documents["ABCLOGISTICS_2025Q2_10Q"]
+        brand_citations = await search_pdf_pages(memory, "3M", limit=1)
+        assert len(brand_citations) == 1
+        record = await memory.get(GetMemoryEntryRequest(citation=brand_citations[0]))
+        assert record.entry.text == "3M_2025_10K\n" + documents["3M_2025_10K"]
