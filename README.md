@@ -27,13 +27,16 @@ You see the context the work needs now: confirmed decisions, constraints, progre
 
 You decide what will matter later and what needs to move with the task. PowerContext stores durable information as Memory and organizes the current objective and state into a Handoff. You can record reusable approaches as Experience or Skill. PowerContext keeps every item within the scope of the work and preserves its sources and earlier revisions.
 
-## CSV evidence and inference adapters
+## Evidence sources and inference adapters
 
 - Capture CSV rows with stable document/key identities, exact original fields and versioned text projections.
 - Use `HTTPMemoryReranker` for bounded HTTP scoring and stable ordering across all candidate batches.
 - Wrap an embedding provider with `CoalescingEmbeddingModel` to share concurrent work, cache successful vectors and retain usage.
+- Capture complete Pi session branches with restartable checkpoints and immutable original events.
+- Transfer ordinary prepared context as verified UTF-8 packs and prefix deltas through the Python Runtime.
 
 See [CSV and inference adapters](docs/en/development/csv-and-inference.md) for Python examples and behavior.
+See [Pi history and context packs](docs/en/development/pi-and-context-packs.md) for branch recovery and wire encoding.
 
 ## Install, configure, and connect your Agent
 
